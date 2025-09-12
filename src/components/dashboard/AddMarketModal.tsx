@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,14 +14,18 @@ import { cn } from "@/lib/utils";
 interface AddMarketModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddMarket: (market: any) => void;
+  onAddMarket?: (market: any) => void;
+  onUpdateMarket?: (market: any) => void;
+  editingMarket?: any;
 }
 
-export function AddMarketModal({ open, onOpenChange, onAddMarket }: AddMarketModalProps) {
+export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket, editingMarket }: AddMarketModalProps) {
   const [formData, setFormData] = useState({
     name: "",
     date: undefined as Date | undefined,
     loadInTime: "",
+    marketStartTime: "",
+    marketEndTime: "",
     location: "",
     fee: "",
     estimatedProfit: "",
@@ -30,46 +34,82 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket }: AddMarketMod
     requirements: "",
   });
 
+  // Reset form when modal opens/closes or when editingMarket changes
+  React.useEffect(() => {
+    if (open && editingMarket) {
+      // Populate form with existing market data for editing
+      setFormData({
+        name: editingMarket.name || "",
+        date: editingMarket.date ? new Date(editingMarket.date) : undefined,
+        loadInTime: editingMarket.loadInTime || "",
+        marketStartTime: editingMarket.marketStartTime || "",
+        marketEndTime: editingMarket.marketEndTime || "",
+        location: editingMarket.location || "",
+        fee: editingMarket.fee?.toString() || "",
+        estimatedProfit: editingMarket.estimatedProfit?.toString() || "",
+        status: editingMarket.status || "pending",
+        organizerContact: editingMarket.organizerContact || "",
+        requirements: editingMarket.requirements?.join('\n') || "",
+      });
+    } else if (open && !editingMarket) {
+      // Reset form for new market
+      setFormData({
+        name: "",
+        date: undefined,
+        loadInTime: "",
+        marketStartTime: "",
+        marketEndTime: "",
+        location: "",
+        fee: "",
+        estimatedProfit: "",
+        status: "pending",
+        organizerContact: "",
+        requirements: "",
+      });
+    }
+  }, [open, editingMarket]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const newMarket = {
-      id: Date.now().toString(),
+    const marketData = {
       ...formData,
       fee: parseFloat(formData.fee) || 0,
       estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
       date: formData.date?.toISOString().split('T')[0] || "",
-      checklist: {
-        insurance: false,
-        permit: false,
-        inventory: false,
-        setup: false,
-      },
       requirements: formData.requirements ? formData.requirements.split('\n').filter(req => req.trim()) : [],
     };
 
-    onAddMarket(newMarket);
+    if (editingMarket) {
+      // Update existing market
+      const updatedMarket = {
+        ...editingMarket,
+        ...marketData,
+      };
+      onUpdateMarket?.(updatedMarket);
+    } else {
+      // Add new market
+      const newMarket = {
+        id: Date.now().toString(),
+        ...marketData,
+        checklist: {
+          insurance: false,
+          permit: false,
+          inventory: false,
+          setup: false,
+        },
+      };
+      onAddMarket?.(newMarket);
+    }
+
     onOpenChange(false);
-    
-    // Reset form
-    setFormData({
-      name: "",
-      date: undefined,
-      loadInTime: "",
-      location: "",
-      fee: "",
-      estimatedProfit: "",
-      status: "pending",
-      organizerContact: "",
-      requirements: "",
-    });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Market</DialogTitle>
+          <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -110,7 +150,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket }: AddMarketMod
             </Popover>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             <div>
               <Label htmlFor="loadInTime">Load-in Time</Label>
               <Input
@@ -122,18 +162,39 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket }: AddMarketMod
               />
             </div>
             <div>
-              <Label htmlFor="status">Status</Label>
-              <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="upcoming">Upcoming</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="marketStartTime">Start Time</Label>
+              <Input
+                id="marketStartTime"
+                value={formData.marketStartTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, marketStartTime: e.target.value }))}
+                placeholder="e.g., 8:00 AM"
+                required
+              />
             </div>
+            <div>
+              <Label htmlFor="marketEndTime">End Time</Label>
+              <Input
+                id="marketEndTime"
+                value={formData.marketEndTime}
+                onChange={(e) => setFormData(prev => ({ ...prev, marketEndTime: e.target.value }))}
+                placeholder="e.g., 2:00 PM"
+                required
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="status">Status</Label>
+            <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="confirmed">Confirmed</SelectItem>
+                <SelectItem value="upcoming">Upcoming</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
@@ -196,7 +257,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket }: AddMarketMod
               Cancel
             </Button>
             <Button type="submit" className="flex-1">
-              Add Market
+              {editingMarket ? "Update Market" : "Add Market"}
             </Button>
           </div>
         </form>

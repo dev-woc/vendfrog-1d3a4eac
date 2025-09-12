@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus } from "lucide-react";
+import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -92,7 +92,7 @@ const initialMarkets: Market[] = [
   },
 ];
 
-function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: (market: Market) => void }) {
+function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; onViewDetails: (market: Market) => void; onEditMarket: (market: Market) => void }) {
   const completedTasks = Object.values(market.checklist).filter(Boolean).length;
   const totalTasks = Object.keys(market.checklist).length;
 
@@ -154,9 +154,15 @@ function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: 
             <CheckSquare className="h-4 w-4 mr-2" />
             Checklist: {completedTasks}/{totalTasks}
           </div>
-          <Button variant="outline" size="sm" onClick={() => onViewDetails(market)}>
-            View Details
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => onEditMarket(market)}>
+              <Edit className="h-4 w-4 mr-1" />
+              Edit
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => onViewDetails(market)}>
+              View Details
+            </Button>
+          </div>
         </div>
         
         <div className="w-full bg-muted rounded-full h-2">
@@ -175,6 +181,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingMarket, setEditingMarket] = useState<Market | null>(null);
 
   const handleViewDetails = (market: Market) => {
     setSelectedMarket(market);
@@ -201,6 +208,25 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
     setMarkets(prev => [newMarket, ...prev]);
   };
 
+  const handleEditMarket = (market: Market) => {
+    setEditingMarket(market);
+    setShowAddModal(true);
+  };
+
+  const handleUpdateMarket = (updatedMarket: Market) => {
+    setMarkets(prev => prev.map(market => 
+      market.id === updatedMarket.id ? updatedMarket : market
+    ));
+    setEditingMarket(null);
+  };
+
+  const handleModalClose = (open: boolean) => {
+    setShowAddModal(open);
+    if (!open) {
+      setEditingMarket(null);
+    }
+  };
+
   const displayedMarkets = showAll ? markets : markets.slice(0, 2);
 
   return (
@@ -220,7 +246,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
       <CardContent>
         <div className="space-y-4">
           {displayedMarkets.map((market) => (
-            <MarketCard key={market.id} market={market} onViewDetails={handleViewDetails} />
+            <MarketCard key={market.id} market={market} onViewDetails={handleViewDetails} onEditMarket={handleEditMarket} />
           ))}
           {!showAll && markets.length > 2 && (
             <div className="pt-4 border-t">
@@ -243,8 +269,10 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
 
       <AddMarketModal
         open={showAddModal}
-        onOpenChange={setShowAddModal}
+        onOpenChange={handleModalClose}
         onAddMarket={handleAddMarket}
+        onUpdateMarket={handleUpdateMarket}
+        editingMarket={editingMarket}
       />
     </Card>
   );
