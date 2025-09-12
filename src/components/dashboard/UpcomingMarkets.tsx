@@ -12,6 +12,8 @@ interface Market {
   name: string;
   date: string;
   loadInTime: string;
+  marketStartTime: string;
+  marketEndTime: string;
   location: string;
   fee: number;
   estimatedProfit: number;
@@ -33,6 +35,8 @@ const initialMarkets: Market[] = [
     name: "Downtown Farmers Market",
     date: "2024-01-15",
     loadInTime: "6:00 AM",
+    marketStartTime: "8:00 AM",
+    marketEndTime: "2:00 PM",
     location: "Main Street Plaza",
     fee: 85,
     estimatedProfit: 400,
@@ -51,6 +55,8 @@ const initialMarkets: Market[] = [
     name: "Weekend Artisan Fair",
     date: "2024-01-20",
     loadInTime: "8:00 AM",
+    marketStartTime: "10:00 AM",
+    marketEndTime: "5:00 PM",
     location: "City Park Pavilion",
     fee: 120,
     estimatedProfit: 650,
@@ -69,6 +75,8 @@ const initialMarkets: Market[] = [
     name: "Holiday Night Market",
     date: "2024-01-25",
     loadInTime: "4:00 PM",
+    marketStartTime: "6:00 PM",
+    marketEndTime: "10:00 PM",
     location: "Harbor District",
     fee: 150,
     estimatedProfit: 800,
@@ -112,7 +120,7 @@ function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: 
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex items-center text-muted-foreground">
             <Clock className="h-4 w-4 mr-2" />
-            {market.loadInTime}
+            Load: {market.loadInTime}
           </div>
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
@@ -126,6 +134,12 @@ function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: 
             <TrendingUp className="h-4 w-4 mr-2" />
             Est. ${market.estimatedProfit}
           </div>
+        </div>
+        
+        <div className="flex items-center text-sm text-muted-foreground border-t pt-3">
+          <Clock className="h-4 w-4 mr-2" />
+          <span className="font-medium">Market Hours:</span>
+          <span className="ml-2">{market.marketStartTime} - {market.marketEndTime}</span>
         </div>
         
         <div className="flex items-center justify-between">
