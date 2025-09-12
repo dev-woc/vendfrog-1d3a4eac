@@ -3,12 +3,14 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { UpcomingMarkets } from "@/components/dashboard/UpcomingMarkets";
 import { FileUpload } from "@/components/dashboard/FileUpload";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { BreadcrumbNav } from "@/components/navigation/BreadcrumbNav";
 
 const Dashboard = () => {
   return (
     <div className="min-h-screen bg-background">
       <DashboardHeader />
       <main className="container mx-auto px-4 py-6 space-y-6">
+        <BreadcrumbNav />
         <div className="flex flex-col space-y-1">
           <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
           <p className="text-muted-foreground">
