@@ -23,6 +23,7 @@ export function BreadcrumbNav({ showBackButton = true }: BreadcrumbNavProps) {
     "/": { title: "Home", href: "/" },
     "/dashboard": { title: "Dashboard", href: "/dashboard" },
     "/markets": { title: "Markets", href: "/markets" },
+    "/documents": { title: "Documents", href: "/documents" },
   };
 
   // Generate breadcrumb items based on current path

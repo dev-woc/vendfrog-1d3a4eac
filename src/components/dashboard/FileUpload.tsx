@@ -3,6 +3,7 @@ import { Upload, FileText, Share2, Check, FolderOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "react-router-dom";
 
 interface UploadedFile {
   id: string;
@@ -162,8 +163,8 @@ export function FileUpload() {
           ))}
         </div>
         
-        <Button className="w-full" variant="outline">
-          View All Documents
+        <Button className="w-full" variant="outline" asChild>
+          <Link to="/documents">View All Documents</Link>
         </Button>
       </CardContent>
     </Card>
