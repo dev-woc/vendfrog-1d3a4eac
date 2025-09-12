@@ -124,7 +124,14 @@ function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: 
           </div>
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
-            {market.location}
+            <a 
+              href={`https://maps.google.com?q=${encodeURIComponent(market.location)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary hover:underline cursor-pointer"
+            >
+              {market.location}
+            </a>
           </div>
           <div className="flex items-center text-muted-foreground">
             <DollarSign className="h-4 w-4 mr-2" />

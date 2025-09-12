@@ -1,4 +1,4 @@
-import { Bell, LogOut, Moon, Sun } from "lucide-react";
+import { Bell, LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -48,6 +48,24 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
+              <DropdownMenuItem asChild>
+                <Link to="/markets" className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Markets</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <FileText className="mr-2 h-4 w-4" />
+                <span>Documents</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <DollarSign className="mr-2 h-4 w-4" />
+                <span>Finance</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <HelpCircle className="mr-2 h-4 w-4" />
+                <span>Help & Support</span>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
