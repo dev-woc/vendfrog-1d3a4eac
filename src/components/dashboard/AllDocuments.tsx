@@ -84,6 +84,35 @@ function DocumentItem({ file }: { file: UploadedFile }) {
     }
   };
 
+  const handleDownload = () => {
+    // Create a dummy file for download demonstration
+    const content = `Document: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = () => {
+    const subject = `Shared Document: ${file.name}`;
+    const body = `I'm sharing the following document with you:
+
+Document: ${file.name}
+Type: ${file.type}
+Size: ${file.size}
+Uploaded: ${new Date(file.uploadDate).toLocaleDateString()}
+
+IMPORTANT: Please manually attach the file "${file.name}" to this email before sending.
+
+You can download the file and attach it to share with others.`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  };
+
   return (
     <Card>
       <CardContent className="p-4">
@@ -104,17 +133,13 @@ function DocumentItem({ file }: { file: UploadedFile }) {
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" onClick={handleDownload}>
               <Download className="h-4 w-4" />
             </Button>
             <Button 
               variant="ghost" 
               size="sm"
-              onClick={() => {
-                const subject = `Shared Document: ${file.name}`;
-                const body = `I'm sharing the following document with you:\n\nDocument: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}\n\nPlease note: You'll need to attach the document separately to this email.`;
-                window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-              }}
+              onClick={handleShare}
             >
               <Share2 className="h-4 w-4" />
             </Button>
