@@ -1,4 +1,5 @@
-import { Upload, FileText, Share2, Check } from "lucide-react";
+import { useState, useRef } from "react";
+import { Upload, FileText, Share2, Check, FolderOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -71,6 +72,46 @@ function FileItem({ file }: { file: UploadedFile }) {
 }
 
 export function FileUpload() {
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFiles(e.dataTransfer.files);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      handleFiles(e.target.files);
+    }
+  };
+
+  const handleFiles = (files: FileList) => {
+    // Here you would typically upload the files
+    console.log("Files to upload:", Array.from(files));
+    // For now, just show an alert
+    alert(`Selected ${files.length} file(s) for upload`);
+  };
+
+  const onButtonClick = () => {
+    fileInputRef.current?.click();
+  };
   return (
     <Card>
       <CardHeader>
@@ -80,12 +121,38 @@ export function FileUpload() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center hover:border-muted-foreground/50 transition-colors cursor-pointer">
+        <div 
+          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+            dragActive 
+              ? "border-primary bg-primary/5" 
+              : "border-muted-foreground/25 hover:border-muted-foreground/50"
+          }`}
+          onDragEnter={handleDrag}
+          onDragLeave={handleDrag}
+          onDragOver={handleDrag}
+          onDrop={handleDrop}
+          onClick={onButtonClick}
+        >
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+            onChange={handleChange}
+            className="hidden"
+          />
           <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
           <p className="text-sm font-medium">Drop files here or click to upload</p>
           <p className="text-xs text-muted-foreground mt-1">
             Insurance documents, permits, certifications (PDF, JPG, PNG)
           </p>
+          
+          <div className="flex justify-center mt-4">
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onButtonClick(); }}>
+              <FolderOpen className="h-4 w-4 mr-2" />
+              Browse Files
+            </Button>
+          </div>
         </div>
         
         <div className="space-y-2">
