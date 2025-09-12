@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FileText, Upload, Share2, Check, Download, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -135,6 +135,20 @@ interface AllDocumentsProps {
 export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      // Handle file upload logic here
+      console.log("Selected files:", files);
+      // You can add file processing logic here
+    }
+  };
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
+  };
 
   const filteredFiles = mockFiles.filter((file) => {
     const matchesSearch = file.name.toLowerCase().includes(searchTerm.toLowerCase());
@@ -155,15 +169,26 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="border-2 border-dashed rounded-lg p-6 text-center border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer">
+            <div 
+              className="border-2 border-dashed rounded-lg p-6 text-center border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer"
+              onClick={triggerFileSelect}
+            >
               <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm font-medium">Drop files here or click to upload</p>
               <p className="text-xs text-muted-foreground mt-1">
                 Insurance documents, permits, certifications (PDF, JPG, PNG)
               </p>
-              <Button variant="outline" size="sm" className="mt-4">
+              <Button variant="outline" size="sm" className="mt-4" onClick={triggerFileSelect}>
                 Browse Files
               </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
             </div>
           </CardContent>
         </Card>
