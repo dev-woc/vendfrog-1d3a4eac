@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
+import { Link } from "react-router-dom";
 
 interface DashboardHeaderProps {
   vendorName?: string;
@@ -15,7 +16,9 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
     <header className="border-b bg-card/50 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <div className="flex items-center space-x-4">
-          <h1 className="text-2xl font-bold text-primary">VendorHub</h1>
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <h1 className="text-2xl font-bold text-primary">VendorHub</h1>
+          </Link>
           <div className="hidden md:block text-sm text-muted-foreground">
             Welcome back, {vendorName}
           </div>
