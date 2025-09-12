@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Clock, DollarSign, CheckSquare, ExternalLink } from "lucide-react";
+import { getMapUrl } from "@/lib/utils";
 
 interface Market {
   id: string;
@@ -164,7 +165,7 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
             <Button 
               variant="outline" 
               className="flex-1"
-              onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`, '_blank')}
+              onClick={() => window.open(getMapUrl(fullAddress), '_blank')}
             >
               <ExternalLink className="h-4 w-4 mr-2" />
               Get Directions

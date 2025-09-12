@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { MarketDetailsModal } from "./MarketDetailsModal";
 import { AddMarketModal } from "./AddMarketModal";
 import { Link } from "react-router-dom";
+import { getMapUrl } from "@/lib/utils";
 
 interface Market {
   id: string;
@@ -152,7 +153,7 @@ function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; o
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
             <a 
-              href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`}
+              href={getMapUrl(fullAddress)}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary hover:underline cursor-pointer"
