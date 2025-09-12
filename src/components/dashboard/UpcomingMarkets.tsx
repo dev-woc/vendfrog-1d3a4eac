@@ -125,7 +125,7 @@ function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; o
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
             <a 
-              href={`https://maps.google.com?q=${encodeURIComponent(market.location)}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(market.location)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary hover:underline cursor-pointer"
