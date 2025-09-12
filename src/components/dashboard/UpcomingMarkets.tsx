@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MarketDetailsModal } from "./MarketDetailsModal";
 import { AddMarketModal } from "./AddMarketModal";
+import { Link } from "react-router-dom";
 
 interface Market {
   id: string;
@@ -148,7 +149,7 @@ function MarketCard({ market, onViewDetails }: { market: Market; onViewDetails: 
   );
 }
 
-export function UpcomingMarkets() {
+export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const [markets, setMarkets] = useState<Market[]>(initialMarkets);
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [showDetails, setShowDetails] = useState(false);
@@ -178,13 +179,16 @@ export function UpcomingMarkets() {
   const handleAddMarket = (newMarket: Market) => {
     setMarkets(prev => [newMarket, ...prev]);
   };
+
+  const displayedMarkets = showAll ? markets : markets.slice(0, 2);
+
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center">
             <Calendar className="h-5 w-5 mr-2" />
-            Upcoming Markets
+            {showAll ? "All Markets" : "Upcoming Markets"}
           </CardTitle>
           <Button onClick={() => setShowAddModal(true)} size="sm">
             <Plus className="h-4 w-4 mr-2" />
@@ -194,9 +198,18 @@ export function UpcomingMarkets() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {markets.map((market) => (
+          {displayedMarkets.map((market) => (
             <MarketCard key={market.id} market={market} onViewDetails={handleViewDetails} />
           ))}
+          {!showAll && markets.length > 2 && (
+            <div className="pt-4 border-t">
+              <Link to="/markets">
+                <Button variant="outline" className="w-full">
+                  Show More Markets ({markets.length - 2} more)
+                </Button>
+              </Link>
+            </div>
+          )}
         </div>
       </CardContent>
 
