@@ -99,12 +99,6 @@ function DocumentItem({ file }: { file: UploadedFile }) {
                 <Badge variant={getTypeColor(file.type)}>
                   {file.type}
                 </Badge>
-                {file.shared && (
-                  <Badge variant="outline" className="text-green-600 border-green-600">
-                    <Check className="h-3 w-3 mr-1" />
-                    Shared
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
@@ -113,19 +107,17 @@ function DocumentItem({ file }: { file: UploadedFile }) {
             <Button variant="ghost" size="sm">
               <Download className="h-4 w-4" />
             </Button>
-            {!file.shared && (
-              <Button 
-                variant="ghost" 
-                size="sm"
-                onClick={() => {
-                  const subject = `Shared Document: ${file.name}`;
-                  const body = `I'm sharing the following document with you:\n\nDocument: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}\n\nPlease note: You'll need to attach the document separately to this email.`;
-                  window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
-                }}
-              >
-                <Share2 className="h-4 w-4" />
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="sm"
+              onClick={() => {
+                const subject = `Shared Document: ${file.name}`;
+                const body = `I'm sharing the following document with you:\n\nDocument: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}\n\nPlease note: You'll need to attach the document separately to this email.`;
+                window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+              }}
+            >
+              <Share2 className="h-4 w-4" />
+            </Button>
             <Button variant="ghost" size="sm">
               <Trash2 className="h-4 w-4" />
             </Button>
