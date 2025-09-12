@@ -30,20 +30,22 @@ export function BreadcrumbNav({ showBackButton = true }: BreadcrumbNavProps) {
     const pathSegments = location.pathname.split("/").filter(Boolean);
     const breadcrumbs: { title: string; href: string; isLast: boolean }[] = [];
 
-    // Always start with Home
-    breadcrumbs.push({
-      title: "Home",
-      href: "/",
-      isLast: false,
-    });
+    // Always start with Dashboard (unless we're on dashboard itself)
+    if (location.pathname !== "/dashboard") {
+      breadcrumbs.push({
+        title: "Dashboard",
+        href: "/dashboard",
+        isLast: false,
+      });
+    }
 
-    // Add intermediate segments
+    // Add current page if it's not dashboard
     let currentPath = "";
     pathSegments.forEach((segment, index) => {
       currentPath += `/${segment}`;
       const isLast = index === pathSegments.length - 1;
       
-      if (routeMap[currentPath]) {
+      if (routeMap[currentPath] && currentPath !== "/dashboard") {
         breadcrumbs.push({
           title: routeMap[currentPath].title,
           href: currentPath,
@@ -62,8 +64,8 @@ export function BreadcrumbNav({ showBackButton = true }: BreadcrumbNavProps) {
 
   const breadcrumbs = generateBreadcrumbs();
 
-  // Don't show breadcrumbs on home page
-  if (location.pathname === "/") {
+  // Don't show breadcrumbs on home page or dashboard page
+  if (location.pathname === "/" || location.pathname === "/dashboard") {
     return null;
   }
 
@@ -91,7 +93,6 @@ export function BreadcrumbNav({ showBackButton = true }: BreadcrumbNavProps) {
                 ) : (
                   <BreadcrumbLink asChild>
                     <Link to={breadcrumb.href} className="flex items-center gap-1">
-                      {breadcrumb.href === "/" && <Home className="h-4 w-4" />}
                       {breadcrumb.title}
                     </Link>
                   </BreadcrumbLink>
