@@ -4,32 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Clock, DollarSign, CheckSquare, ExternalLink } from "lucide-react";
 import { getMapUrl } from "@/lib/utils";
-
-interface Market {
-  id: string;
-  name: string;
-  date: string;
-  loadInTime: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country?: string;
-  };
-  fee: number;
-  estimatedProfit: number;
-  status: "upcoming" | "confirmed" | "pending";
-  checklist: {
-    insurance: boolean;
-    permit: boolean;
-    inventory: boolean;
-    setup: boolean;
-  };
-  description?: string;
-  organizerContact?: string;
-  requirements?: string[];
-}
+import { Market } from "@/types/market";
 
 interface MarketDetailsModalProps {
   market: Market | null;

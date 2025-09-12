@@ -1,40 +1,14 @@
 import { useState } from "react";
-import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit } from "lucide-react";
+import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { MarketDetailsModal } from "./MarketDetailsModal";
 import { AddMarketModal } from "./AddMarketModal";
+import { CloseMarketModal } from "./CloseMarketModal";
 import { Link } from "react-router-dom";
 import { getMapUrl } from "@/lib/utils";
-
-interface Market {
-  id: string;
-  name: string;
-  date: string;
-  loadInTime: string;
-  marketStartTime: string;
-  marketEndTime: string;
-  address: {
-    street: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country?: string;
-  };
-  fee: number;
-  estimatedProfit: number;
-  status: "upcoming" | "confirmed" | "pending";
-  checklist: {
-    insurance: boolean;
-    permit: boolean;
-    inventory: boolean;
-    setup: boolean;
-  };
-  description?: string;
-  organizerContact?: string;
-  requirements?: string[];
-}
+import { Market } from "@/types/market";
 
 const initialMarkets: Market[] = [
   {
@@ -117,12 +91,22 @@ const initialMarkets: Market[] = [
   },
 ];
 
-function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; onViewDetails: (market: Market) => void; onEditMarket: (market: Market) => void }) {
+function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: { 
+  market: Market; 
+  onViewDetails: (market: Market) => void; 
+  onEditMarket: (market: Market) => void;
+  onCloseMarket?: (market: Market) => void;
+}) {
   const completedTasks = Object.values(market.checklist).filter(Boolean).length;
   const totalTasks = Object.keys(market.checklist).length;
   
   // Create full address string for display and mapping
   const fullAddress = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}${market.address.country ? `, ${market.address.country}` : ''}`;
+
+  // Check if market date has passed
+  const marketDate = new Date(market.date);
+  const today = new Date();
+  const canClose = marketDate < today && market.status !== "completed";
 
   return (
     <Card className="border border-border/50 hover:shadow-md transition-shadow">
@@ -183,6 +167,12 @@ function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; o
             Checklist: {completedTasks}/{totalTasks}
           </div>
           <div className="flex gap-2">
+            {canClose && onCloseMarket && (
+              <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)}>
+                <X className="h-4 w-4 mr-1" />
+                Close
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={() => onEditMarket(market)}>
               <Edit className="h-4 w-4 mr-1" />
               Edit
@@ -210,6 +200,8 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const [showDetails, setShowDetails] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingMarket, setEditingMarket] = useState<Market | null>(null);
+  const [showCloseModal, setShowCloseModal] = useState(false);
+  const [marketToClose, setMarketToClose] = useState<Market | null>(null);
 
   const handleViewDetails = (market: Market) => {
     setSelectedMarket(market);
@@ -255,7 +247,28 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
     }
   };
 
-  const displayedMarkets = showAll ? markets : markets.slice(0, 2);
+  const handleCloseMarket = (market: Market) => {
+    setMarketToClose(market);
+    setShowCloseModal(true);
+  };
+
+  const handleCloseMarketConfirm = (marketId: string, actualRevenue: number) => {
+    setMarkets(prev => prev.map(market => 
+      market.id === marketId 
+        ? { 
+            ...market, 
+            status: "completed" as const,
+            actualRevenue,
+            completed: true,
+            completedDate: new Date().toISOString().split('T')[0]
+          }
+        : market
+    ));
+    setMarketToClose(null);
+  };
+
+  const upcomingMarkets = markets.filter(market => market.status !== "completed");
+  const displayedMarkets = showAll ? upcomingMarkets : upcomingMarkets.slice(0, 2);
 
   return (
     <Card>
@@ -274,15 +287,29 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
       <CardContent>
         <div className="space-y-4">
           {displayedMarkets.map((market) => (
-            <MarketCard key={market.id} market={market} onViewDetails={handleViewDetails} onEditMarket={handleEditMarket} />
+            <MarketCard 
+              key={market.id} 
+              market={market} 
+              onViewDetails={handleViewDetails} 
+              onEditMarket={handleEditMarket}
+              onCloseMarket={handleCloseMarket}
+            />
           ))}
-          {!showAll && markets.length > 2 && (
+          {!showAll && upcomingMarkets.length > 2 && (
             <div className="pt-4 border-t">
               <Link to="/markets">
                 <Button variant="outline" className="w-full">
-                  Show More Markets ({markets.length - 2} more)
+                  Show More Markets ({upcomingMarkets.length - 2} more)
                 </Button>
               </Link>
+            </div>
+          )}
+          {displayedMarkets.length === 0 && (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No upcoming markets.</p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Add your first market to get started.
+              </p>
             </div>
           )}
         </div>
@@ -301,6 +328,13 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         onAddMarket={handleAddMarket}
         onUpdateMarket={handleUpdateMarket}
         editingMarket={editingMarket}
+      />
+
+      <CloseMarketModal
+        market={marketToClose}
+        open={showCloseModal}
+        onOpenChange={setShowCloseModal}
+        onCloseMarket={handleCloseMarketConfirm}
       />
     </Card>
   );
