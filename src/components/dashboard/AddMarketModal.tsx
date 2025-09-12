@@ -26,7 +26,13 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     loadInTime: "",
     marketStartTime: "",
     marketEndTime: "",
-    location: "",
+    address: {
+      street: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      country: "US"
+    },
     fee: "",
     estimatedProfit: "",
     status: "pending" as "pending" | "confirmed" | "upcoming",
@@ -44,7 +50,13 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         loadInTime: editingMarket.loadInTime || "",
         marketStartTime: editingMarket.marketStartTime || "",
         marketEndTime: editingMarket.marketEndTime || "",
-        location: editingMarket.location || "",
+        address: editingMarket.address || {
+          street: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "US"
+        },
         fee: editingMarket.fee?.toString() || "",
         estimatedProfit: editingMarket.estimatedProfit?.toString() || "",
         status: editingMarket.status || "pending",
@@ -59,7 +71,13 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         loadInTime: "",
         marketStartTime: "",
         marketEndTime: "",
-        location: "",
+        address: {
+          street: "",
+          city: "",
+          state: "",
+          zipCode: "",
+          country: "US"
+        },
         fee: "",
         estimatedProfit: "",
         status: "pending",
@@ -197,15 +215,77 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="e.g., Main Street Plaza"
-              required
-            />
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="street">Street Address</Label>
+              <Input
+                id="street"
+                value={formData.address.street}
+                onChange={(e) => setFormData(prev => ({ 
+                  ...prev, 
+                  address: { ...prev.address, street: e.target.value }
+                }))}
+                placeholder="e.g., 123 Main Street Plaza"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={formData.address.city}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, city: e.target.value }
+                  }))}
+                  placeholder="e.g., Portland"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="state">State/Province</Label>
+                <Input
+                  id="state"
+                  value={formData.address.state}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, state: e.target.value }
+                  }))}
+                  placeholder="e.g., OR"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="zipCode">ZIP/Postal Code</Label>
+                <Input
+                  id="zipCode"
+                  value={formData.address.zipCode}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, zipCode: e.target.value }
+                  }))}
+                  placeholder="e.g., 97201"
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Input
+                  id="country"
+                  value={formData.address.country || "US"}
+                  onChange={(e) => setFormData(prev => ({ 
+                    ...prev, 
+                    address: { ...prev.address, country: e.target.value }
+                  }))}
+                  placeholder="e.g., US"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">

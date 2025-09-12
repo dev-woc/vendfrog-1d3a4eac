@@ -9,7 +9,13 @@ interface Market {
   name: string;
   date: string;
   loadInTime: string;
-  location: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country?: string;
+  };
   fee: number;
   estimatedProfit: number;
   status: "upcoming" | "confirmed" | "pending";
@@ -36,6 +42,9 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
 
   const completedTasks = Object.values(market.checklist).filter(Boolean).length;
   const totalTasks = Object.keys(market.checklist).length;
+  
+  // Create full address string for display and mapping
+  const fullAddress = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}${market.address.country ? `, ${market.address.country}` : ''}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,7 +70,7 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
               <div className="flex items-center text-sm">
                 <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
                 <span className="font-medium">Location:</span>
-                <span className="ml-2">{market.location}</span>
+                <span className="ml-2">{fullAddress}</span>
               </div>
             </div>
             <div className="space-y-3">
@@ -152,7 +161,11 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
 
           {/* Actions */}
           <div className="flex gap-2 pt-4 border-t">
-            <Button variant="outline" className="flex-1">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => window.open(`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`, '_blank')}
+            >
               <ExternalLink className="h-4 w-4 mr-2" />
               Get Directions
             </Button>

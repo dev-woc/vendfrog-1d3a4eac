@@ -14,7 +14,13 @@ interface Market {
   loadInTime: string;
   marketStartTime: string;
   marketEndTime: string;
-  location: string;
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country?: string;
+  };
   fee: number;
   estimatedProfit: number;
   status: "upcoming" | "confirmed" | "pending";
@@ -37,7 +43,13 @@ const initialMarkets: Market[] = [
     loadInTime: "6:00 AM",
     marketStartTime: "8:00 AM",
     marketEndTime: "2:00 PM",
-    location: "Main Street Plaza",
+    address: {
+      street: "123 Main Street Plaza",
+      city: "Portland",
+      state: "OR",
+      zipCode: "97201",
+      country: "US"
+    },
     fee: 85,
     estimatedProfit: 400,
     status: "confirmed",
@@ -57,7 +69,13 @@ const initialMarkets: Market[] = [
     loadInTime: "8:00 AM",
     marketStartTime: "10:00 AM",
     marketEndTime: "5:00 PM",
-    location: "City Park Pavilion",
+    address: {
+      street: "456 City Park Pavilion",
+      city: "Portland",
+      state: "OR",
+      zipCode: "97202",
+      country: "US"
+    },
     fee: 120,
     estimatedProfit: 650,
     status: "upcoming",
@@ -77,7 +95,13 @@ const initialMarkets: Market[] = [
     loadInTime: "4:00 PM",
     marketStartTime: "6:00 PM",
     marketEndTime: "10:00 PM",
-    location: "Harbor District",
+    address: {
+      street: "789 Harbor District Way",
+      city: "Portland",
+      state: "OR",
+      zipCode: "97203",
+      country: "US"
+    },
     fee: 150,
     estimatedProfit: 800,
     status: "pending",
@@ -95,6 +119,9 @@ const initialMarkets: Market[] = [
 function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; onViewDetails: (market: Market) => void; onEditMarket: (market: Market) => void }) {
   const completedTasks = Object.values(market.checklist).filter(Boolean).length;
   const totalTasks = Object.keys(market.checklist).length;
+  
+  // Create full address string for display and mapping
+  const fullAddress = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}${market.address.country ? `, ${market.address.country}` : ''}`;
 
   return (
     <Card className="border border-border/50 hover:shadow-md transition-shadow">
@@ -125,12 +152,12 @@ function MarketCard({ market, onViewDetails, onEditMarket }: { market: Market; o
           <div className="flex items-center text-muted-foreground">
             <MapPin className="h-4 w-4 mr-2" />
             <a 
-              href={`https://maps.google.com/?q=${encodeURIComponent(market.location)}`}
+              href={`https://maps.google.com/?q=${encodeURIComponent(fullAddress)}`}
               target="_blank"
               rel="noopener noreferrer"
               className="hover:text-primary hover:underline cursor-pointer"
             >
-              {market.location}
+              {market.address.street}, {market.address.city}
             </a>
           </div>
           <div className="flex items-center text-muted-foreground">
