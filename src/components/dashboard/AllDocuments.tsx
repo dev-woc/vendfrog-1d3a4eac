@@ -15,56 +15,8 @@ interface UploadedFile {
   url?: string;
 }
 
-const mockFiles: UploadedFile[] = [
-  {
-    id: "1",
-    name: "vendor-insurance-2024.pdf",
-    size: "2.4 MB",
-    uploadDate: "2024-01-10",
-    type: "insurance",
-    shared: true,
-  },
-  {
-    id: "2",
-    name: "business-permit.pdf",
-    size: "1.1 MB",
-    uploadDate: "2024-01-08",
-    type: "permit",
-    shared: false,
-  },
-  {
-    id: "3",
-    name: "food-handler-cert.pdf",
-    size: "875 KB",
-    uploadDate: "2024-01-05",
-    type: "certification",
-    shared: true,
-  },
-  {
-    id: "4",
-    name: "tax-registration.pdf",
-    size: "1.5 MB",
-    uploadDate: "2024-01-03",
-    type: "tax",
-    shared: false,
-  },
-  {
-    id: "5",
-    name: "market-contract-2024.pdf",
-    size: "3.2 MB",
-    uploadDate: "2024-01-01",
-    type: "contract",
-    shared: true,
-  },
-  {
-    id: "6",
-    name: "liability-insurance.pdf",
-    size: "2.8 MB",
-    uploadDate: "2023-12-28",
-    type: "insurance",
-    shared: true,
-  },
-];
+// Sample data for returning users only
+const mockFiles: UploadedFile[] = [];
 
 function DocumentItem({ file }: { file: UploadedFile }) {
   const getTypeColor = (type: string) => {

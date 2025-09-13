@@ -275,9 +275,18 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Upcoming Markets</CardTitle>
-            <Link to="/markets">
-              <Button variant="outline" size="sm">View All</Button>
-            </Link>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                Add New Market
+              </Button>
+              <Link to="/markets">
+                <Button variant="outline" size="sm">View All</Button>
+              </Link>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -370,13 +379,18 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
       {/* Desktop Tabs */}
       <div className="hidden sm:block">
         <Tabs value={activeFilter} onValueChange={setActiveFilter}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="all-upcoming">All Upcoming</TabsTrigger>
-            <TabsTrigger value="pending">Pending</TabsTrigger>
-            <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-            <TabsTrigger value="upcoming">This Week</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between">
+            <TabsList className="grid grid-cols-5">
+              <TabsTrigger value="all-upcoming">All Upcoming</TabsTrigger>
+              <TabsTrigger value="pending">Pending</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
+              <TabsTrigger value="upcoming">This Week</TabsTrigger>
+              <TabsTrigger value="completed">Completed</TabsTrigger>
+            </TabsList>
+            <Button onClick={() => setIsAddModalOpen(true)}>
+              Add New Market
+            </Button>
+          </div>
         </Tabs>
       </div>
 

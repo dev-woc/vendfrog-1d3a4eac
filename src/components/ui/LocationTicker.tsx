@@ -22,14 +22,14 @@ export function LocationTicker() {
         setLocation({
           timezone: data.timezone || 'UTC',
           city: data.city || 'Unknown',
-          country: data.country_name || 'Unknown'
+          country: data.region_code || data.country_code || 'Unknown'
         });
       } catch (error) {
         // Fallback to UTC if IP geolocation fails
         setLocation({
           timezone: 'UTC',
           city: 'UTC',
-          country: 'World'
+          country: 'UTC'
         });
       } finally {
         setLoading(false);
@@ -74,7 +74,7 @@ export function LocationTicker() {
       <div className="flex flex-col items-end">
         <span className="font-semibold">{formattedTime}</span>
         <span>{formattedDate}</span>
-        <span className="text-[10px] opacity-75">{location.city}</span>
+        <span className="text-[10px] opacity-75">{location.city}, {location.country}</span>
       </div>
     </div>
   );

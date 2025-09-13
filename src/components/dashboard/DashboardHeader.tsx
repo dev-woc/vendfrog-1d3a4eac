@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Bell, LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -5,13 +6,57 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
 import { LocationTicker } from "@/components/ui/LocationTicker";
+import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardHeaderProps {
   vendorName?: string;
 }
 
-export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeaderProps) {
+export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
   const { setTheme, theme } = useTheme();
+  const [userProfile, setUserProfile] = useState<{ full_name: string; } | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('user_id', user.id)
+            .single();
+          
+          setUserProfile(profile);
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
+
+  const getDisplayName = () => {
+    if (vendorName) return vendorName;
+    if (userProfile?.full_name) return userProfile.full_name;
+    return "User";
+  };
+
+  const getInitials = () => {
+    const name = getDisplayName();
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  };
+
+  const displayName = getDisplayName();
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm">
@@ -42,10 +87,17 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
             >
               Finance
             </Link>
+            <span className="text-muted-foreground text-xs">|</span>
+            <Link 
+              to="/help" 
+              className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Help
+            </Link>
           </nav>
           
           <div className="hidden xl:block text-xs sm:text-sm text-muted-foreground">
-            Welcome back, {vendorName}
+            Welcome back, {displayName}
           </div>
         </div>
         
@@ -72,8 +124,8 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-8 w-8 sm:h-9 sm:w-9 rounded-full">
                 <Avatar className="h-8 w-8 sm:h-9 sm:w-9">
-                  <AvatarImage src="/avatar.jpg" alt={vendorName} />
-                  <AvatarFallback className="text-xs">SJ</AvatarFallback>
+                  <AvatarImage src="/avatar.jpg" alt={displayName} />
+                  <AvatarFallback className="text-xs">{getInitials()}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
@@ -96,9 +148,11 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
                   <span>Finance</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <HelpCircle className="mr-2 h-4 w-4" />
-                <span>Help & Support</span>
+              <DropdownMenuItem asChild>
+                <Link to="/help" className="flex items-center">
+                  <HelpCircle className="mr-2 h-4 w-4" />
+                  <span>Help & Support</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <LogOut className="mr-2 h-4 w-4" />
