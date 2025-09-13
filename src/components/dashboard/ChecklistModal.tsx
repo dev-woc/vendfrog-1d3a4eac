@@ -69,18 +69,22 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
           {/* Checklist Items */}
           <div className="space-y-3">
             {market.checklist.map((item) => (
-              <div key={item.id} className="flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
+              <div key={item.id} className={`flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-all duration-200 ${
+                item.completed ? 'bg-muted/30 border-primary/20' : ''
+              }`}>
                 <Checkbox 
                   checked={item.completed}
                   onCheckedChange={() => handleChecklistUpdate(item.id)}
                 />
                 <label 
-                  className={`text-sm cursor-pointer flex-1 ${
-                    item.completed ? 'line-through text-muted-foreground' : ''
+                  className={`text-sm cursor-pointer flex-1 transition-all duration-200 ${
+                    item.completed 
+                      ? 'line-through text-muted-foreground opacity-60' 
+                      : 'text-foreground'
                   }`}
                   onClick={() => handleChecklistUpdate(item.id)}
                 >
-                  {item.label}
+                  {item.completed ? '✓ ' : ''}{item.label}
                 </label>
               </div>
             ))}

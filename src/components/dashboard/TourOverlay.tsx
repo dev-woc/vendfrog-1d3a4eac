@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { X, ArrowLeft, ArrowRight } from 'lucide-react';
+import { X, ArrowLeft, ArrowRight, GripVertical } from 'lucide-react';
 import { useDashboardTour, TourStep } from '@/hooks/use-dashboard-tour';
 
 interface TourOverlayProps {
@@ -24,6 +24,9 @@ export const TourOverlay = ({
 }: TourOverlayProps) => {
   const [targetElement, setTargetElement] = useState<HTMLElement | null>(null);
   const [overlayStyle, setOverlayStyle] = useState<React.CSSProperties>({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const element = document.querySelector(step.target) as HTMLElement;
@@ -125,6 +128,54 @@ export const TourOverlay = ({
     };
   }, [step]);
 
+  // Drag functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    
+    setIsDragging(true);
+    const rect = cardRef.current.getBoundingClientRect();
+    setDragOffset({
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
+    });
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !cardRef.current) return;
+    
+    e.preventDefault();
+    const newX = e.clientX - dragOffset.x;
+    const newY = e.clientY - dragOffset.y;
+    
+    // Keep within viewport bounds
+    const maxX = window.innerWidth - cardRef.current.offsetWidth;
+    const maxY = window.innerHeight - cardRef.current.offsetHeight;
+    
+    const boundedX = Math.max(0, Math.min(newX, maxX));
+    const boundedY = Math.max(0, Math.min(newY, maxY));
+    
+    setOverlayStyle(prev => ({
+      ...prev,
+      left: `${boundedX}px`,
+      top: `${boundedY}px`,
+    }));
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isDragging, dragOffset]);
+
   return (
     <>
       {/* Backdrop */}
@@ -135,12 +186,14 @@ export const TourOverlay = ({
       
       {/* Tour Card */}
       <Card 
-        className="bg-background border shadow-xl z-[1000] max-w-full"
+        ref={cardRef}
+        className={`bg-background border shadow-xl z-[1000] max-w-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
         style={overlayStyle}
       >
-        <CardHeader className="pb-3 px-4 md:px-6">
+        <CardHeader className="pb-3 px-4 md:px-6" onMouseDown={handleMouseDown}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 min-w-0">
+              <GripVertical className="h-4 w-4 text-muted-foreground cursor-grab" />
               <CardTitle className="text-base md:text-lg truncate">{step.title}</CardTitle>
               <Badge variant="secondary" className="text-xs shrink-0">
                 {currentStep + 1} of {totalSteps}
