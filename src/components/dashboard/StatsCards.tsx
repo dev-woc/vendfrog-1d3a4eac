@@ -1,5 +1,6 @@
 import { TrendingUp, Calendar, DollarSign, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMarkets } from "@/contexts/MarketContext";
 
 interface StatCardProps {
   title: string;
@@ -29,33 +30,52 @@ function StatCard({ title, value, change, trend, icon }: StatCardProps) {
 }
 
 export function StatsCards() {
+  const { getPastMarkets, getUpcomingMarkets } = useMarkets();
+  
+  const pastMarkets = getPastMarkets();
+  const upcomingMarkets = getUpcomingMarkets();
+  
+  // Calculate total revenue from completed markets
+  const totalRevenue = pastMarkets.reduce((sum, market) => sum + (market.actualRevenue || 0), 0);
+  
+  // Calculate current month markets (past + upcoming)
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  const thisMonthMarkets = [...pastMarkets, ...upcomingMarkets].filter(market => {
+    const marketDate = new Date(market.date);
+    return marketDate.getMonth() === currentMonth && marketDate.getFullYear() === currentYear;
+  });
+  
+  // Calculate average per completed market
+  const averagePerMarket = pastMarkets.length > 0 ? Math.round(totalRevenue / pastMarkets.length) : 0;
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total Revenue"
-        value="$12,430"
-        change="8.2%"
+        value={`$${totalRevenue.toLocaleString()}`}
+        change={pastMarkets.length > 1 ? "8.2%" : undefined}
         trend="up"
         icon={<DollarSign className="h-4 w-4" />}
       />
       <StatCard
         title="Markets This Month"
-        value="8"
-        change="2"
+        value={thisMonthMarkets.length.toString()}
+        change={thisMonthMarkets.length > 0 ? "2" : undefined}
         trend="up"
         icon={<Calendar className="h-4 w-4" />}
       />
       <StatCard
         title="Average Per Market"
-        value="$1,554"
-        change="12.1%"
+        value={`$${averagePerMarket.toLocaleString()}`}
+        change={pastMarkets.length > 1 ? "12.1%" : undefined}
         trend="up"
         icon={<TrendingUp className="h-4 w-4" />}
       />
       <StatCard
-        title="Documents Uploaded"
-        value="12"
-        change="3"
+        title="Completed Markets"
+        value={pastMarkets.length.toString()}
+        change={pastMarkets.length > 0 ? "1" : undefined}
         trend="up"
         icon={<FileText className="h-4 w-4" />}
       />

@@ -1,68 +1,8 @@
-import { useState } from "react";
 import { MapPin, Clock, DollarSign, TrendingUp, Calendar, TrendingDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Market } from "@/types/market";
-
-const pastMarkets: Market[] = [
-  {
-    id: "past-1",
-    name: "Winter Holiday Market",
-    date: "2023-12-15",
-    loadInTime: "7:00 AM",
-    marketStartTime: "9:00 AM",
-    marketEndTime: "4:00 PM",
-    address: {
-      street: "456 Festival Square",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97204",
-      country: "US"
-    },
-    fee: 100,
-    estimatedProfit: 500,
-    actualRevenue: 580,
-    status: "completed" as const,
-    organizerContact: "events@festivalsquare.com",
-    requirements: ["Holiday-themed products", "Festive decorations"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: true,
-      setup: true,
-    },
-    completedDate: "2023-12-15",
-  },
-  {
-    id: "past-2",
-    name: "Autumn Craft Fair",
-    date: "2023-10-28",
-    loadInTime: "6:30 AM",
-    marketStartTime: "8:00 AM",
-    marketEndTime: "3:00 PM",
-    address: {
-      street: "789 Community Center",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97205",
-      country: "US"
-    },
-    fee: 75,
-    estimatedProfit: 350,
-    actualRevenue: 320,
-    status: "completed" as const,
-    organizerContact: "info@communitycenter.org",
-    requirements: ["Handmade crafts only", "Setup by 7:30 AM"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: true,
-      setup: true,
-    },
-    completedDate: "2023-10-28",
-  }
-];
+import { useMarkets } from "@/contexts/MarketContext";
 
 function PastMarketCard({ market }: { market: Market }) {
   const actualProfit = (market.actualRevenue || 0) - market.fee;
@@ -101,7 +41,7 @@ function PastMarketCard({ market }: { market: Market }) {
           </div>
           <div className="flex items-center text-muted-foreground">
             <DollarSign className="h-4 w-4 mr-2" />
-            Revenue: ${market.actualRevenue}
+            Revenue: ${market.actualRevenue || 0}
           </div>
         </div>
 
@@ -128,7 +68,8 @@ function PastMarketCard({ market }: { market: Market }) {
 }
 
 export function PastMarkets() {
-  const [markets] = useState<Market[]>(pastMarkets);
+  const { getPastMarkets } = useMarkets();
+  const markets = getPastMarkets();
 
   return (
     <Card>

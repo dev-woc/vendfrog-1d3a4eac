@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit, X } from "lucide-react";
+import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit, Archive } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,87 +9,8 @@ import { CloseMarketModal } from "./CloseMarketModal";
 import { Link } from "react-router-dom";
 import { getMapUrl } from "@/lib/utils";
 import { Market } from "@/types/market";
+import { useMarkets } from "@/contexts/MarketContext";
 
-const initialMarkets: Market[] = [
-  {
-    id: "1",
-    name: "Downtown Farmers Market",
-    date: "2024-01-15",
-    loadInTime: "6:00 AM",
-    marketStartTime: "8:00 AM",
-    marketEndTime: "2:00 PM",
-    address: {
-      street: "123 Main Street Plaza",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97201",
-      country: "US"
-    },
-    fee: 85,
-    estimatedProfit: 400,
-    status: "confirmed",
-    organizerContact: "sarah@downtownmarket.com",
-    requirements: ["Valid business license", "Liability insurance", "Setup by 7:30 AM"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: false,
-      setup: false,
-    },
-  },
-  {
-    id: "2",
-    name: "Weekend Artisan Fair",
-    date: "2024-01-20",
-    loadInTime: "8:00 AM",
-    marketStartTime: "10:00 AM",
-    marketEndTime: "5:00 PM",
-    address: {
-      street: "456 City Park Pavilion",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97202",
-      country: "US"
-    },
-    fee: 120,
-    estimatedProfit: 650,
-    status: "upcoming",
-    organizerContact: "info@artisanfair.org",
-    requirements: ["Handmade items only", "Tent required", "Insurance certificate"],
-    checklist: {
-      insurance: true,
-      permit: false,
-      inventory: false,
-      setup: false,
-    },
-  },
-  {
-    id: "3",
-    name: "Holiday Night Market",
-    date: "2024-01-25",
-    loadInTime: "4:00 PM",
-    marketStartTime: "6:00 PM",
-    marketEndTime: "10:00 PM",
-    address: {
-      street: "789 Harbor District Way",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97203",
-      country: "US"
-    },
-    fee: 150,
-    estimatedProfit: 800,
-    status: "pending",
-    organizerContact: "events@harbordistrict.com",
-    requirements: ["Holiday themed products", "Lighting setup", "Extended hours"],
-    checklist: {
-      insurance: false,
-      permit: false,
-      inventory: false,
-      setup: false,
-    },
-  },
-];
 
 function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: { 
   market: Market; 
@@ -169,7 +90,7 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
           <div className="flex gap-2">
             {canClose && onCloseMarket && (
               <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)}>
-                <X className="h-4 w-4 mr-1" />
+                <Archive className="h-4 w-4 mr-1" />
                 Close
               </Button>
             )}
@@ -195,7 +116,7 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
 }
 
 export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
-  const [markets, setMarkets] = useState<Market[]>(initialMarkets);
+  const { getUpcomingMarkets, updateMarketChecklist, addMarket, updateMarket, closeMarket } = useMarkets();
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [showDetails, setShowDetails] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -203,17 +124,15 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [marketToClose, setMarketToClose] = useState<Market | null>(null);
 
+  const upcomingMarkets = getUpcomingMarkets();
+
   const handleViewDetails = (market: Market) => {
     setSelectedMarket(market);
     setShowDetails(true);
   };
 
   const handleUpdateChecklist = (marketId: string, item: keyof Market['checklist']) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === marketId 
-        ? { ...market, checklist: { ...market.checklist, [item]: !market.checklist[item] } }
-        : market
-    ));
+    updateMarketChecklist(marketId, item);
     
     // Update selected market if it's the one being modified
     if (selectedMarket?.id === marketId) {
@@ -225,7 +144,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   };
 
   const handleAddMarket = (newMarket: Market) => {
-    setMarkets(prev => [newMarket, ...prev]);
+    addMarket(newMarket);
   };
 
   const handleEditMarket = (market: Market) => {
@@ -234,9 +153,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   };
 
   const handleUpdateMarket = (updatedMarket: Market) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === updatedMarket.id ? updatedMarket : market
-    ));
+    updateMarket(updatedMarket);
     setEditingMarket(null);
   };
 
@@ -253,21 +170,10 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   };
 
   const handleCloseMarketConfirm = (marketId: string, actualRevenue: number) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === marketId 
-        ? { 
-            ...market, 
-            status: "completed" as const,
-            actualRevenue,
-            completed: true,
-            completedDate: new Date().toISOString().split('T')[0]
-          }
-        : market
-    ));
+    closeMarket(marketId, actualRevenue);
     setMarketToClose(null);
   };
 
-  const upcomingMarkets = markets.filter(market => market.status !== "completed");
   const displayedMarkets = showAll ? upcomingMarkets : upcomingMarkets.slice(0, 2);
 
   return (
