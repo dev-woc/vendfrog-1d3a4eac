@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { TimeSelector } from "@/components/ui/TimeSelector";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
@@ -166,35 +167,29 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             </Popover>
           </div>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="loadInTime">Load-in Time</Label>
-              <Input
-                id="loadInTime"
+              <Label>Load-in Time</Label>
+              <TimeSelector
                 value={formData.loadInTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, loadInTime: e.target.value }))}
-                placeholder="e.g., 6:00 AM"
-                required
+                onChange={(time) => setFormData(prev => ({ ...prev, loadInTime: time }))}
+                placeholder="Select load-in time"
               />
             </div>
             <div>
-              <Label htmlFor="marketStartTime">Start Time</Label>
-              <Input
-                id="marketStartTime"
+              <Label>Market Start Time</Label>
+              <TimeSelector
                 value={formData.marketStartTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, marketStartTime: e.target.value }))}
-                placeholder="e.g., 8:00 AM"
-                required
+                onChange={(time) => setFormData(prev => ({ ...prev, marketStartTime: time }))}
+                placeholder="Select start time"
               />
             </div>
             <div>
-              <Label htmlFor="marketEndTime">End Time</Label>
-              <Input
-                id="marketEndTime"
+              <Label>Market End Time</Label>
+              <TimeSelector
                 value={formData.marketEndTime}
-                onChange={(e) => setFormData(prev => ({ ...prev, marketEndTime: e.target.value }))}
-                placeholder="e.g., 2:00 PM"
-                required
+                onChange={(time) => setFormData(prev => ({ ...prev, marketEndTime: time }))}
+                placeholder="Select end time"
               />
             </div>
           </div>
