@@ -302,12 +302,12 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="all-upcoming" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="all-upcoming">All Upcoming ({upcomingMarkets.length})</TabsTrigger>
-              <TabsTrigger value="pending">Pending ({pendingMarkets.length})</TabsTrigger>
-              <TabsTrigger value="confirmed">Confirmed ({confirmedMarkets.length})</TabsTrigger>
-              <TabsTrigger value="upcoming">Upcoming ({upcomingStatusMarkets.length})</TabsTrigger>
-              <TabsTrigger value="completed">Completed ({completedMarkets.length})</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
+              <TabsTrigger value="all-upcoming" className="text-xs sm:text-sm">All ({upcomingMarkets.length})</TabsTrigger>
+              <TabsTrigger value="pending" className="text-xs sm:text-sm">Pending ({pendingMarkets.length})</TabsTrigger>
+              <TabsTrigger value="confirmed" className="text-xs sm:text-sm">Confirmed ({confirmedMarkets.length})</TabsTrigger>
+              <TabsTrigger value="upcoming" className="text-xs sm:text-sm">Upcoming ({upcomingStatusMarkets.length})</TabsTrigger>
+              <TabsTrigger value="completed" className="text-xs sm:text-sm col-span-2 sm:col-span-1">Completed ({completedMarkets.length})</TabsTrigger>
             </TabsList>
             
             <TabsContent value="all-upcoming">
