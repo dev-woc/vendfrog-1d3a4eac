@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { useMarkets } from "@/contexts/MarketContext";
 import { MarketDetailsModal } from "@/components/dashboard/MarketDetailsModal";
+import { AddMarketModal } from "@/components/dashboard/AddMarketModal";
 import { format, parseISO } from "date-fns";
 import { Calendar, TrendingUp, DollarSign } from "lucide-react";
 
 export const UpcomingProjections = () => {
-  const { getUpcomingMarkets, updateMarketChecklist } = useMarkets();
+  const { getUpcomingMarkets, updateMarketChecklist, updateMarket } = useMarkets();
   const [selectedMarket, setSelectedMarket] = useState<any>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const upcomingMarkets = getUpcomingMarkets();
   
   const totalEstimatedRevenue = upcomingMarkets.reduce((sum, market) => sum + market.estimatedProfit, 0);
@@ -18,7 +20,13 @@ export const UpcomingProjections = () => {
 
   const handleMarketClick = (market: any) => {
     setSelectedMarket(market);
-    setIsModalOpen(true);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditComplete = (updatedMarket: any) => {
+    updateMarket(updatedMarket);
+    setIsEditModalOpen(false);
+    setSelectedMarket(null);
   };
 
   return (
@@ -100,11 +108,12 @@ export const UpcomingProjections = () => {
           )}
         </div>
 
-        <MarketDetailsModal
-          market={selectedMarket}
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          onUpdateChecklist={updateMarketChecklist}
+        <AddMarketModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          onAddMarket={() => {}}
+          onUpdateMarket={handleEditComplete}
+          editingMarket={selectedMarket}
         />
       </CardContent>
     </Card>

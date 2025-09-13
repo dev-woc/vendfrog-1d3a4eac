@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 
 interface StatCardProps {
   title: string;
-  value: string;
+  value: string | React.ReactNode;
   change?: string;
   trend?: "up" | "down";
   icon: React.ReactNode;
@@ -21,7 +21,7 @@ function StatCard({ title, value, change, trend, icon, linkText, linkTo }: StatC
         <div className="text-muted-foreground">{icon}</div>
       </CardHeader>
       <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-        <div className="text-lg sm:text-2xl font-bold text-foreground">{value}</div>
+        <div className="text-lg sm:text-2xl font-bold">{value}</div>
         {change && (
           <p className={`text-xs ${trend === "up" ? "text-success" : "text-destructive"} mt-1`}>
             {trend === "up" ? "+" : ""}{change} from last month
@@ -64,7 +64,7 @@ export function StatsCards() {
     <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total Revenue"
-        value={`$${totalRevenue.toLocaleString()}`}
+        value={<span className="text-emerald-600">${totalRevenue.toLocaleString()}</span>}
         change={pastMarkets.length > 1 ? "8.2%" : undefined}
         trend="up"
         icon={<DollarSign className="h-4 w-4" />}
@@ -73,7 +73,7 @@ export function StatsCards() {
       />
       <StatCard
         title="Markets This Month"
-        value={thisMonthMarkets.length.toString()}
+        value={<span className="text-blue-600">{thisMonthMarkets.length.toString()}</span>}
         change={thisMonthMarkets.length > 0 ? "2" : undefined}
         trend="up"
         icon={<Calendar className="h-4 w-4" />}
@@ -82,7 +82,7 @@ export function StatsCards() {
       />
       <StatCard
         title="Average Per Market"
-        value={`$${averagePerMarket.toLocaleString()}`}
+        value={<span className="text-purple-600">${averagePerMarket.toLocaleString()}</span>}
         change={pastMarkets.length > 1 ? "12.1%" : undefined}
         trend="up"
         icon={<TrendingUp className="h-4 w-4" />}
@@ -91,7 +91,7 @@ export function StatsCards() {
       />
       <StatCard
         title="Completed Markets"
-        value={pastMarkets.length.toString()}
+        value={<span className="text-orange-600">{pastMarkets.length.toString()}</span>}
         change={pastMarkets.length > 0 ? "1" : undefined}
         trend="up"
         icon={<FileText className="h-4 w-4" />}

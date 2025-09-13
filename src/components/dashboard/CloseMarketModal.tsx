@@ -113,7 +113,7 @@ export function CloseMarketModal({ market, open, onOpenChange, onCloseMarket }: 
             onClick={handleSubmit} 
             disabled={!actualRevenue || revenueNumber < 0 || isSubmitting}
           >
-            {isSubmitting ? "Closing..." : "Close Market"}
+            {isSubmitting ? "Closing..." : "Close & Submit"}
           </Button>
         </DialogFooter>
       </DialogContent>
