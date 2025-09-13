@@ -15,11 +15,27 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
   return (
     <header className="border-b bg-card/50 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-6">
           <Link to="/" className="hover:opacity-80 transition-opacity">
             <h1 className="text-2xl font-bold text-primary">VendorHub</h1>
           </Link>
-          <div className="hidden md:block text-sm text-muted-foreground">
+          
+          <nav className="hidden md:flex items-center space-x-6">
+            <Link 
+              to="/markets" 
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Markets
+            </Link>
+            <Link 
+              to="/documents" 
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Documents
+            </Link>
+          </nav>
+          
+          <div className="hidden lg:block text-sm text-muted-foreground">
             Welcome back, {vendorName}
           </div>
         </div>
@@ -54,9 +70,11 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
                   <span>Markets</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <FileText className="mr-2 h-4 w-4" />
-                <span>Documents</span>
+              <DropdownMenuItem asChild>
+                <Link to="/documents" className="flex items-center">
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>Documents</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <DollarSign className="mr-2 h-4 w-4" />
