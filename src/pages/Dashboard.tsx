@@ -28,20 +28,21 @@ const Dashboard = () => {
       <main className="container mx-auto px-4 py-6 space-y-6">
         <BreadcrumbNav />
         <div className="flex flex-col space-y-1">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-muted-foreground">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h2>
+              <p className="text-muted-foreground text-sm sm:text-base">
                 Track your market performance and manage your vendor business.
               </p>
             </div>
             <Button
               variant="outline"
               onClick={startTour}
-              className="flex items-center gap-2"
+              className="flex items-center gap-2 self-start sm:self-auto min-h-[44px] px-4"
             >
               <HelpCircle className="h-4 w-4" />
-              Show me around
+              <span className="hidden sm:inline">Show me around</span>
+              <span className="sm:hidden">Tour</span>
             </Button>
           </div>
         </div>
@@ -50,11 +51,11 @@ const Dashboard = () => {
           <StatsCards />
         </div>
         
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="lg:col-span-2" data-tour="upcoming-markets">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="md:col-span-2 lg:col-span-2" data-tour="upcoming-markets">
             <UpcomingMarkets />
           </div>
-          <div data-tour="file-upload">
+          <div className="md:col-span-2 lg:col-span-1" data-tour="file-upload">
             <FileUpload />
           </div>
         </div>

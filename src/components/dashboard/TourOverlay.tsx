@@ -37,50 +37,72 @@ export const TourOverlay = ({
       // Scroll element into view
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Calculate overlay position with viewport constraints
-      const cardWidth = 320;
-      const cardHeight = 200; // Approximate card height
+      // Mobile-first responsive card dimensions
+      const isMobile = window.innerWidth < 768;
+      const cardWidth = isMobile ? Math.min(window.innerWidth - 32, 320) : 320;
+      const cardHeight = isMobile ? 220 : 200;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
+      const padding = isMobile ? 16 : 20;
       
       let top = rect.top + scrollTop;
       let left = rect.left + scrollLeft;
 
-      switch (step.position) {
-        case 'bottom':
+      if (isMobile) {
+        // On mobile, always center horizontally and position based on available space
+        left = (viewportWidth - cardWidth) / 2 + scrollLeft;
+        
+        // Check if there's space below the element
+        const spaceBelow = viewportHeight - (rect.bottom - scrollTop + scrollTop);
+        const spaceAbove = rect.top - scrollTop + scrollTop;
+        
+        if (spaceBelow >= cardHeight + padding) {
           top = rect.bottom + scrollTop + 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
-          break;
-        case 'top':
+        } else if (spaceAbove >= cardHeight + padding) {
           top = rect.top + scrollTop - cardHeight - 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
-          break;
-        case 'left':
-          top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
-          left = rect.left + scrollLeft - cardWidth - 10;
-          break;
-        case 'right':
-          top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
-          left = rect.right + scrollLeft + 10;
-          break;
-        default:
-          top = rect.bottom + scrollTop + 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
+        } else {
+          // Center vertically if no good space above or below
+          top = scrollTop + (viewportHeight - cardHeight) / 2;
+        }
+      } else {
+        // Desktop positioning logic
+        switch (step.position) {
+          case 'bottom':
+            top = rect.bottom + scrollTop + 10;
+            left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
+            break;
+          case 'top':
+            top = rect.top + scrollTop - cardHeight - 10;
+            left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
+            break;
+          case 'left':
+            top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
+            left = rect.left + scrollLeft - cardWidth - 10;
+            break;
+          case 'right':
+            top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
+            left = rect.right + scrollLeft + 10;
+            break;
+          default:
+            top = rect.bottom + scrollTop + 10;
+            left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
+        }
       }
 
       // Ensure the overlay stays within viewport bounds
-      const minTop = scrollTop + 20;
-      const maxTop = scrollTop + viewportHeight - cardHeight - 20;
-      const minLeft = scrollLeft + 20;
-      const maxLeft = scrollLeft + viewportWidth - cardWidth - 20;
+      const minTop = scrollTop + padding;
+      const maxTop = scrollTop + viewportHeight - cardHeight - padding;
+      const minLeft = scrollLeft + padding;
+      const maxLeft = scrollLeft + viewportWidth - cardWidth - padding;
 
       top = Math.max(minTop, Math.min(top, maxTop));
       left = Math.max(minLeft, Math.min(left, maxLeft));
 
       setOverlayStyle({
         position: 'fixed',
-        top: `${Math.max(20, Math.min(top - scrollTop, viewportHeight - cardHeight - 20))}px`,
-        left: `${Math.max(20, Math.min(left - scrollLeft, viewportWidth - cardWidth - 20))}px`,
+        top: `${Math.max(padding, Math.min(top - scrollTop, viewportHeight - cardHeight - padding))}px`,
+        left: `${Math.max(padding, Math.min(left - scrollLeft, viewportWidth - cardWidth - padding))}px`,
+        width: `${cardWidth}px`,
         zIndex: 1000,
       });
 
@@ -107,20 +129,20 @@ export const TourOverlay = ({
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 z-[998]"
+        className="fixed inset-0 bg-black/60 z-[998] backdrop-blur-sm"
         onClick={onClose}
       />
       
       {/* Tour Card */}
       <Card 
-        className="w-80 bg-background border shadow-lg z-[1000]"
+        className="bg-background border shadow-xl z-[1000] max-w-full"
         style={overlayStyle}
       >
-        <CardHeader className="pb-3">
+        <CardHeader className="pb-3 px-4 md:px-6">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <CardTitle className="text-lg">{step.title}</CardTitle>
-              <Badge variant="secondary" className="text-xs">
+            <div className="flex items-center gap-2 min-w-0">
+              <CardTitle className="text-base md:text-lg truncate">{step.title}</CardTitle>
+              <Badge variant="secondary" className="text-xs shrink-0">
                 {currentStep + 1} of {totalSteps}
               </Badge>
             </div>
@@ -128,36 +150,38 @@ export const TourOverlay = ({
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="h-8 w-8"
+              className="h-8 w-8 shrink-0 ml-2"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="pt-0 space-y-4">
+        <CardContent className="pt-0 space-y-4 px-4 md:px-6 pb-4 md:pb-6">
           <p className="text-sm text-muted-foreground leading-relaxed">
             {step.content}
           </p>
           
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={onPrev}
               disabled={currentStep === 0}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 min-h-[44px] px-4"
             >
               <ArrowLeft className="h-3 w-3" />
-              Previous
+              <span className="hidden sm:inline">Previous</span>
+              <span className="sm:hidden">Prev</span>
             </Button>
             
             {currentStep === totalSteps - 1 ? (
-              <Button size="sm" onClick={onClose}>
+              <Button size="sm" onClick={onClose} className="min-h-[44px] px-4">
                 Finish Tour
               </Button>
             ) : (
-              <Button size="sm" onClick={onNext} className="flex items-center gap-1">
-                Next
+              <Button size="sm" onClick={onNext} className="flex items-center gap-1 min-h-[44px] px-4">
+                <span className="hidden sm:inline">Next</span>
+                <span className="sm:hidden">Next</span>
                 <ArrowRight className="h-3 w-3" />
               </Button>
             )}
