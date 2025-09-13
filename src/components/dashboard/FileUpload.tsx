@@ -72,22 +72,22 @@ You can download the file and attach it to share with others.`;
   };
 
   return (
-    <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
-      <div className="flex items-center space-x-3">
-        <FileText className="h-8 w-8 text-muted-foreground" />
-        <div>
-          <p className="font-medium text-sm">{file.name}</p>
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border rounded-lg bg-muted/20 gap-3">
+      <div className="flex items-center space-x-3 min-w-0 flex-1">
+        <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground shrink-0" />
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-sm truncate">{file.name}</p>
           <p className="text-xs text-muted-foreground">
             {file.size} • {new Date(file.uploadDate).toLocaleDateString()}
           </p>
         </div>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-2 self-end sm:self-auto shrink-0">
         <Button 
           variant="ghost" 
           size="sm" 
           onClick={handleDownload}
-          className="hover:bg-muted"
+          className="hover:bg-muted min-h-[40px] min-w-[40px]"
         >
           <Download className="h-4 w-4" />
         </Button>
@@ -95,7 +95,7 @@ You can download the file and attach it to share with others.`;
           variant="ghost" 
           size="sm"
           onClick={handleShare}
-          className="hover:bg-muted"
+          className="hover:bg-muted min-h-[40px] min-w-[40px]"
         >
           <Share2 className="h-4 w-4" />
         </Button>
@@ -155,7 +155,7 @@ export function FileUpload() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div 
-          className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors cursor-pointer ${
+          className={`border-2 border-dashed rounded-lg p-4 sm:p-6 text-center transition-colors cursor-pointer ${
             dragActive 
               ? "border-primary bg-primary/5" 
               : "border-muted-foreground/25 hover:border-muted-foreground/50"
@@ -174,14 +174,14 @@ export function FileUpload() {
             onChange={handleChange}
             className="hidden"
           />
-          <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+          <Upload className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2" />
           <p className="text-sm font-medium">Drop files here or click to upload</p>
-          <p className="text-xs text-muted-foreground mt-1">
+          <p className="text-xs text-muted-foreground mt-1 px-2">
             Insurance documents, permits, certifications (PDF, JPG, PNG)
           </p>
           
           <div className="flex justify-center mt-4">
-            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onButtonClick(); }}>
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onButtonClick(); }} className="min-h-[44px]">
               <FolderOpen className="h-4 w-4 mr-2" />
               Browse Files
             </Button>
@@ -195,7 +195,7 @@ export function FileUpload() {
           ))}
         </div>
         
-        <Button className="w-full" variant="outline" asChild>
+        <Button className="w-full min-h-[44px]" variant="outline" asChild>
           <Link to="/documents">View All Documents</Link>
         </Button>
       </CardContent>

@@ -16,21 +16,21 @@ interface StatCardProps {
 function StatCard({ title, value, change, trend, icon, linkText, linkTo }: StatCardProps) {
   return (
     <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
+        <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground leading-tight">{title}</CardTitle>
         <div className="text-muted-foreground">{icon}</div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-foreground">{value}</div>
+      <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
+        <div className="text-lg sm:text-2xl font-bold text-foreground">{value}</div>
         {change && (
-          <p className={`text-xs ${trend === "up" ? "text-success" : "text-destructive"}`}>
+          <p className={`text-xs ${trend === "up" ? "text-success" : "text-destructive"} mt-1`}>
             {trend === "up" ? "+" : ""}{change} from last month
           </p>
         )}
         {linkText && linkTo && (
           <Link 
             to={linkTo} 
-            className="text-xs text-primary hover:underline mt-2 inline-block"
+            className="text-xs text-primary hover:underline mt-1 sm:mt-2 inline-block"
           >
             {linkText}
           </Link>
@@ -61,7 +61,7 @@ export function StatsCards() {
   const averagePerMarket = pastMarkets.length > 0 ? Math.round(totalRevenue / pastMarkets.length) : 0;
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
       <StatCard
         title="Total Revenue"
         value={`$${totalRevenue.toLocaleString()}`}

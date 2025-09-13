@@ -119,3 +119,51 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+/* Mobile-first optimizations */
+@layer components {
+  /* Better touch targets for mobile */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improve readability on small screens */
+  .text-mobile-body {
+    @apply text-sm leading-relaxed;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    @apply space-y-4 sm:space-y-6;
+  }
+  
+  /* Responsive container */
+  .mobile-container {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Mobile-optimized cards */
+  .mobile-card {
+    @apply p-4 sm:p-6;
+  }
+  
+  /* Better button spacing for mobile */
+  .mobile-button {
+    @apply min-h-[44px] px-4 py-2;
+  }
+  
+  /* Responsive text sizing */
+  .mobile-title {
+    @apply text-xl sm:text-2xl lg:text-3xl;
+  }
+  
+  .mobile-subtitle {
+    @apply text-sm sm:text-base;
+  }
+  
+  /* Touch-friendly dropdowns */
+  .mobile-dropdown-item {
+    @apply min-h-[44px] px-4 py-2;
+  }
+}

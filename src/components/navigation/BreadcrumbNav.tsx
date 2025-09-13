@@ -72,29 +72,29 @@ export function BreadcrumbNav({ showBackButton = true }: BreadcrumbNavProps) {
   }
 
   return (
-    <div className="flex items-center gap-4 mb-4">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-3 sm:mb-4">
       {showBackButton && (
         <Button
           variant="ghost"
           size="sm"
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 min-h-[40px] px-3"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back
+          <span className="hidden sm:inline">Back</span>
         </Button>
       )}
       
-      <Breadcrumb>
-        <BreadcrumbList>
+      <Breadcrumb className="overflow-x-auto">
+        <BreadcrumbList className="flex-nowrap">
           {breadcrumbs.map((breadcrumb, index) => (
             <div key={breadcrumb.href} className="flex items-center">
               <BreadcrumbItem>
                 {breadcrumb.isLast ? (
-                  <BreadcrumbPage>{breadcrumb.title}</BreadcrumbPage>
+                  <BreadcrumbPage className="text-sm">{breadcrumb.title}</BreadcrumbPage>
                 ) : (
                   <BreadcrumbLink asChild>
-                    <Link to={breadcrumb.href} className="flex items-center gap-1">
+                    <Link to={breadcrumb.href} className="flex items-center gap-1 text-sm">
                       {breadcrumb.title}
                     </Link>
                   </BreadcrumbLink>

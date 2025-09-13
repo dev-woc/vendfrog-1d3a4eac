@@ -45,9 +45,9 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
 
   return (
     <Card className="border border-border/50 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg">{market.name}</CardTitle>
+      <CardHeader className="pb-3 px-4 sm:px-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <CardTitle className="text-base sm:text-lg leading-tight">{market.name}</CardTitle>
           <Badge 
             variant={displayStatus === "confirmed" ? "default" : displayStatus === "pending" ? "secondary" : displayStatus === "upcoming" ? "outline" : "outline"}
           >
