@@ -37,36 +37,50 @@ export const TourOverlay = ({
       // Scroll element into view
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-      // Calculate overlay position
+      // Calculate overlay position with viewport constraints
+      const cardWidth = 320;
+      const cardHeight = 200; // Approximate card height
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
       let top = rect.top + scrollTop;
       let left = rect.left + scrollLeft;
 
       switch (step.position) {
         case 'bottom':
           top = rect.bottom + scrollTop + 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - 150;
+          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
           break;
         case 'top':
-          top = rect.top + scrollTop - 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - 150;
+          top = rect.top + scrollTop - cardHeight - 10;
+          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
           break;
         case 'left':
-          top = rect.top + scrollTop + (rect.height / 2) - 100;
-          left = rect.left + scrollLeft - 320;
+          top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
+          left = rect.left + scrollLeft - cardWidth - 10;
           break;
         case 'right':
-          top = rect.top + scrollTop + (rect.height / 2) - 100;
+          top = rect.top + scrollTop + (rect.height / 2) - (cardHeight / 2);
           left = rect.right + scrollLeft + 10;
           break;
         default:
           top = rect.bottom + scrollTop + 10;
-          left = rect.left + scrollLeft + (rect.width / 2) - 150;
+          left = rect.left + scrollLeft + (rect.width / 2) - (cardWidth / 2);
       }
 
+      // Ensure the overlay stays within viewport bounds
+      const minTop = scrollTop + 20;
+      const maxTop = scrollTop + viewportHeight - cardHeight - 20;
+      const minLeft = scrollLeft + 20;
+      const maxLeft = scrollLeft + viewportWidth - cardWidth - 20;
+
+      top = Math.max(minTop, Math.min(top, maxTop));
+      left = Math.max(minLeft, Math.min(left, maxLeft));
+
       setOverlayStyle({
-        position: 'absolute',
-        top: `${Math.max(10, top)}px`,
-        left: `${Math.max(10, Math.min(left, window.innerWidth - 320))}px`,
+        position: 'fixed',
+        top: `${Math.max(20, Math.min(top - scrollTop, viewportHeight - cardHeight - 20))}px`,
+        left: `${Math.max(20, Math.min(left - scrollLeft, viewportWidth - cardWidth - 20))}px`,
         zIndex: 1000,
       });
 
