@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { MapPin, Clock, DollarSign, CheckSquare, ExternalLink } from "lucide-react";
 import { getMapUrl } from "@/lib/utils";
 import { Market } from "@/types/market";
+import { useToast } from "@/hooks/use-toast";
 
 interface MarketDetailsModalProps {
   market: Market | null;
@@ -14,10 +15,27 @@ interface MarketDetailsModalProps {
 }
 
 export function MarketDetailsModal({ market, open, onOpenChange, onUpdateChecklist }: MarketDetailsModalProps) {
+  const { toast } = useToast();
+  
   if (!market) return null;
 
   const completedTasks = market.checklist.filter(item => item.completed).length;
   const totalTasks = market.checklist.length;
+  
+  const handleChecklistUpdate = (checklistItemId: string) => {
+    onUpdateChecklist(market.id, checklistItemId);
+    
+    // Find the item to determine if it's being checked or unchecked
+    const item = market.checklist.find(item => item.id === checklistItemId);
+    const isCompleting = !item?.completed;
+    
+    toast({
+      title: isCompleting ? "Task completed!" : "Task marked incomplete",
+      description: isCompleting 
+        ? `"${item?.label}" has been marked as complete.`
+        : `"${item?.label}" has been marked as incomplete.`,
+    });
+  };
   
   // Create full address string for display and mapping
   const fullAddress = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}${market.address.country ? `, ${market.address.country}` : ''}`;
@@ -91,7 +109,7 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
                 <div key={item.id} className="flex items-center space-x-2">
                   <Checkbox 
                     checked={item.completed}
-                    onCheckedChange={() => onUpdateChecklist(market.id, item.id)}
+                    onCheckedChange={() => handleChecklistUpdate(item.id)}
                   />
                   <label className="text-sm">
                     {item.label}

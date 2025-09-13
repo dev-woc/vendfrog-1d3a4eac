@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TimeSelector } from "@/components/ui/TimeSelector";
-import { CalendarIcon } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+import { CalendarIcon, Save } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddMarketModalProps {
   open: boolean;
@@ -21,6 +23,9 @@ interface AddMarketModalProps {
 }
 
 export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket, editingMarket }: AddMarketModalProps) {
+  const { toast } = useToast();
+  const [isSaving, setIsSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     date: undefined as Date | undefined,
@@ -41,6 +46,17 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     requirements: "",
     checklistItems: [] as { id: string; label: string }[],
   });
+
+  // Auto-save functionality
+  useEffect(() => {
+    if (!editingMarket || !hasUnsavedChanges) return;
+
+    const autoSaveTimer = setTimeout(async () => {
+      await handleAutoSave();
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    return () => clearTimeout(autoSaveTimer);
+  }, [formData, hasUnsavedChanges]);
 
   // Reset form when modal opens/closes or when editingMarket changes
   React.useEffect(() => {
@@ -88,8 +104,54 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         requirements: "",
         checklistItems: [],
       });
+      setHasUnsavedChanges(false);
     }
   }, [open, editingMarket]);
+
+  const handleAutoSave = async () => {
+    if (!editingMarket || !hasUnsavedChanges) return;
+    
+    setIsSaving(true);
+    try {
+
+      const marketData = {
+        ...formData,
+        fee: parseFloat(formData.fee) || 0,
+        estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
+        date: formData.date?.toISOString().split('T')[0] || "",
+        requirements: formData.requirements ? formData.requirements.split('\n').filter(req => req.trim()) : [],
+        checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
+      };
+
+      const updatedMarket = {
+        ...editingMarket,
+        ...marketData,
+      };
+
+      onUpdateMarket?.(updatedMarket);
+      setHasUnsavedChanges(false);
+      
+      toast({
+        title: "Changes saved",
+        description: "Market details have been automatically saved.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save failed",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleFormChange = (newData: any) => {
+    setFormData(newData);
+    if (editingMarket) {
+      setHasUnsavedChanges(true);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -119,6 +181,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       onAddMarket?.(newMarket);
     }
 
+    setHasUnsavedChanges(false);
     onOpenChange(false);
   };
 
@@ -126,7 +189,23 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
+            {editingMarket && (
+              <div className="flex items-center gap-2">
+                {isSaving && <Progress value={100} className="w-16 h-2" />}
+                {hasUnsavedChanges && !isSaving && (
+                  <span className="text-xs text-amber-600 flex items-center gap-1">
+                    <Save className="h-3 w-3" />
+                    Auto-saving...
+                  </span>
+                )}
+                {!hasUnsavedChanges && !isSaving && (
+                  <span className="text-xs text-green-600">Saved</span>
+                )}
+              </div>
+            )}
+          </div>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -135,7 +214,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              onChange={(e) => handleFormChange({ ...formData, name: e.target.value })}
               placeholder="e.g., Downtown Farmers Market"
               required
             />
@@ -160,7 +239,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Calendar
                   mode="single"
                   selected={formData.date}
-                  onSelect={(date) => setFormData(prev => ({ ...prev, date }))}
+                  onSelect={(date) => handleFormChange({ ...formData, date })}
                   initialFocus
                 />
               </PopoverContent>
@@ -172,7 +251,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
               <Label>Load-in Time</Label>
               <TimeSelector
                 value={formData.loadInTime}
-                onChange={(time) => setFormData(prev => ({ ...prev, loadInTime: time }))}
+                onChange={(time) => handleFormChange({ ...formData, loadInTime: time })}
                 placeholder="Select load-in time"
               />
             </div>
@@ -180,7 +259,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
               <Label>Market Start Time</Label>
               <TimeSelector
                 value={formData.marketStartTime}
-                onChange={(time) => setFormData(prev => ({ ...prev, marketStartTime: time }))}
+                onChange={(time) => handleFormChange({ ...formData, marketStartTime: time })}
                 placeholder="Select start time"
               />
             </div>
@@ -188,7 +267,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
               <Label>Market End Time</Label>
               <TimeSelector
                 value={formData.marketEndTime}
-                onChange={(time) => setFormData(prev => ({ ...prev, marketEndTime: time }))}
+                onChange={(time) => handleFormChange({ ...formData, marketEndTime: time })}
                 placeholder="Select end time"
               />
             </div>
@@ -196,7 +275,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
 
           <div>
             <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value: any) => setFormData(prev => ({ ...prev, status: value }))}>
+            <Select value={formData.status} onValueChange={(value: any) => handleFormChange({ ...formData, status: value })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -214,10 +293,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
               <Input
                 id="street"
                 value={formData.address.street}
-                onChange={(e) => setFormData(prev => ({ 
-                  ...prev, 
-                  address: { ...prev.address, street: e.target.value }
-                }))}
+                onChange={(e) => handleFormChange({ 
+                  ...formData, 
+                  address: { ...formData.address, street: e.target.value }
+                })}
                 placeholder="e.g., 123 Main Street Plaza"
                 required
               />
@@ -229,10 +308,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Input
                   id="city"
                   value={formData.address.city}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, city: e.target.value }
-                  }))}
+                  onChange={(e) => handleFormChange({ 
+                    ...formData, 
+                    address: { ...formData.address, city: e.target.value }
+                  })}
                   placeholder="e.g., Portland"
                   required
                 />
@@ -242,10 +321,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Input
                   id="state"
                   value={formData.address.state}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, state: e.target.value }
-                  }))}
+                  onChange={(e) => handleFormChange({ 
+                    ...formData, 
+                    address: { ...formData.address, state: e.target.value }
+                  })}
                   placeholder="e.g., OR"
                   required
                 />
@@ -258,10 +337,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Input
                   id="zipCode"
                   value={formData.address.zipCode}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, zipCode: e.target.value }
-                  }))}
+                  onChange={(e) => handleFormChange({ 
+                    ...formData, 
+                    address: { ...formData.address, zipCode: e.target.value }
+                  })}
                   placeholder="e.g., 97201"
                   required
                 />
@@ -271,10 +350,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Input
                   id="country"
                   value={formData.address.country || "US"}
-                  onChange={(e) => setFormData(prev => ({ 
-                    ...prev, 
-                    address: { ...prev.address, country: e.target.value }
-                  }))}
+                  onChange={(e) => handleFormChange({ 
+                    ...formData, 
+                    address: { ...formData.address, country: e.target.value }
+                  })}
                   placeholder="e.g., US"
                 />
               </div>
@@ -288,7 +367,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 id="fee"
                 type="number"
                 value={formData.fee}
-                onChange={(e) => setFormData(prev => ({ ...prev, fee: e.target.value }))}
+                onChange={(e) => handleFormChange({ ...formData, fee: e.target.value })}
                 placeholder="85"
               />
             </div>
@@ -298,7 +377,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 id="estimatedProfit"
                 type="number"
                 value={formData.estimatedProfit}
-                onChange={(e) => setFormData(prev => ({ ...prev, estimatedProfit: e.target.value }))}
+                onChange={(e) => handleFormChange({ ...formData, estimatedProfit: e.target.value })}
                 placeholder="400"
               />
             </div>
@@ -309,7 +388,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             <Input
               id="organizerContact"
               value={formData.organizerContact}
-              onChange={(e) => setFormData(prev => ({ ...prev, organizerContact: e.target.value }))}
+              onChange={(e) => handleFormChange({ ...formData, organizerContact: e.target.value })}
               placeholder="contact@market.com or (555) 123-4567"
             />
           </div>
@@ -319,7 +398,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             <Textarea
               id="requirements"
               value={formData.requirements}
-              onChange={(e) => setFormData(prev => ({ ...prev, requirements: e.target.value }))}
+              onChange={(e) => handleFormChange({ ...formData, requirements: e.target.value })}
               placeholder="Valid business license&#10;Liability insurance&#10;Food handler's permit"
               rows={3}
             />
@@ -336,7 +415,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                     onChange={(e) => {
                       const newItems = [...formData.checklistItems];
                       newItems[index] = { ...item, label: e.target.value };
-                      setFormData(prev => ({ ...prev, checklistItems: newItems }));
+                      handleFormChange({ ...formData, checklistItems: newItems });
                     }}
                     placeholder="Enter checklist item"
                     className="flex-1"
@@ -347,7 +426,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                     size="sm"
                     onClick={() => {
                       const newItems = formData.checklistItems.filter((_, i) => i !== index);
-                      setFormData(prev => ({ ...prev, checklistItems: newItems }));
+                      handleFormChange({ ...formData, checklistItems: newItems });
                     }}
                   >
                     Remove
@@ -361,7 +440,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 size="sm"
                 onClick={() => {
                   const newItem = { id: Date.now().toString(), label: "" };
-                  setFormData(prev => ({ ...prev, checklistItems: [...prev.checklistItems, newItem] }));
+                  handleFormChange({ ...formData, checklistItems: [...formData.checklistItems, newItem] });
                 }}
                 className="w-full"
               >
@@ -385,7 +464,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                       size="sm"
                       onClick={() => {
                         const newItem = { id: Date.now().toString(), label: suggestion };
-                        setFormData(prev => ({ ...prev, checklistItems: [...prev.checklistItems, newItem] }));
+                        handleFormChange({ ...formData, checklistItems: [...formData.checklistItems, newItem] });
                       }}
                     >
                       + {suggestion}
