@@ -1,0 +1,81 @@
+import { useState, useEffect } from 'react';
+import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
+
+interface LocationData {
+  timezone: string;
+  city: string;
+  country: string;
+}
+
+export function LocationTicker() {
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [location, setLocation] = useState<LocationData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Get user's location from IP
+    const fetchLocation = async () => {
+      try {
+        const response = await fetch('https://ipapi.co/json/');
+        const data = await response.json();
+        setLocation({
+          timezone: data.timezone || 'UTC',
+          city: data.city || 'Unknown',
+          country: data.country_name || 'Unknown'
+        });
+      } catch (error) {
+        // Fallback to UTC if IP geolocation fails
+        setLocation({
+          timezone: 'UTC',
+          city: 'UTC',
+          country: 'World'
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLocation();
+  }, []);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="text-xs text-muted-foreground animate-pulse">
+        Loading location...
+      </div>
+    );
+  }
+
+  if (!location) return null;
+
+  const formattedTime = formatInTimeZone(
+    currentTime, 
+    location.timezone, 
+    'HH:mm:ss'
+  );
+  
+  const formattedDate = formatInTimeZone(
+    currentTime, 
+    location.timezone, 
+    'MMM dd, yyyy'
+  );
+
+  return (
+    <div className="text-xs text-muted-foreground font-mono">
+      <div className="flex flex-col items-end">
+        <span className="font-semibold">{formattedTime}</span>
+        <span>{formattedDate}</span>
+        <span className="text-[10px] opacity-75">{location.city}</span>
+      </div>
+    </div>
+  );
+}

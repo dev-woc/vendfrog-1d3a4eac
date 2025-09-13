@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
+import { LocationTicker } from "@/components/ui/LocationTicker";
 
 interface DashboardHeaderProps {
   vendorName?: string;
@@ -20,18 +21,26 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
             <h1 className="text-2xl font-bold text-primary">VendorHub</h1>
           </Link>
           
-          <nav className="hidden md:flex items-center space-x-6">
+          <nav className="hidden md:flex items-center space-x-4">
             <Link 
               to="/markets" 
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Markets
             </Link>
+            <span className="text-muted-foreground">|</span>
             <Link 
               to="/documents" 
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Documents
+            </Link>
+            <span className="text-muted-foreground">|</span>
+            <Link 
+              to="/finance" 
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Finance
             </Link>
           </nav>
           
@@ -41,6 +50,10 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
         </div>
         
         <div className="flex items-center space-x-4">
+          <div className="hidden lg:block">
+            <LocationTicker />
+          </div>
+          
           <Button variant="ghost" size="icon">
             <Bell className="h-5 w-5" />
           </Button>
@@ -76,9 +89,11 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
                   <span>Documents</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <DollarSign className="mr-2 h-4 w-4" />
-                <span>Finance</span>
+              <DropdownMenuItem asChild>
+                <Link to="/finance" className="flex items-center">
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  <span>Finance</span>
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <HelpCircle className="mr-2 h-4 w-4" />
