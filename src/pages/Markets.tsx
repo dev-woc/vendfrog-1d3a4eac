@@ -1,6 +1,7 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { UpcomingMarkets } from "@/components/dashboard/UpcomingMarkets";
 import { PastMarkets } from "@/components/dashboard/PastMarkets";
+import { MarketsOverviewCard } from "@/components/dashboard/MarketsOverviewCard";
 import { BreadcrumbNav } from "@/components/navigation/BreadcrumbNav";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -16,6 +17,8 @@ const Markets = () => {
             Manage your upcoming markets and view past performance.
           </p>
         </div>
+        
+        <MarketsOverviewCard />
         
         <Tabs defaultValue="upcoming" className="space-y-6">
           <TabsList>
