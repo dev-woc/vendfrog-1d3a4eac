@@ -30,15 +30,28 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
   const today = new Date();
   const canClose = marketDate < today && market.status !== "completed";
 
+  // Calculate days until market
+  const daysUntilMarket = Math.ceil((marketDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  
+  // Determine display status with automatic logic
+  const getDisplayStatus = () => {
+    if (market.status === "completed") return "completed";
+    if (market.status === "confirmed") return "confirmed";
+    if (daysUntilMarket <= 30 && daysUntilMarket >= 0) return "upcoming";
+    return market.status;
+  };
+
+  const displayStatus = getDisplayStatus();
+
   return (
     <Card className="border border-border/50 hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">{market.name}</CardTitle>
           <Badge 
-            variant={market.status === "confirmed" ? "default" : market.status === "pending" ? "secondary" : "outline"}
+            variant={displayStatus === "confirmed" ? "default" : displayStatus === "pending" ? "secondary" : displayStatus === "upcoming" ? "outline" : "outline"}
           >
-            {market.status}
+            {displayStatus}
           </Badge>
         </div>
         <div className="text-sm text-muted-foreground">
@@ -48,6 +61,11 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
             month: "long", 
             day: "numeric" 
           })}
+          {daysUntilMarket >= 0 && daysUntilMarket <= 30 && (
+            <span className="ml-2 text-primary font-medium">
+              ({daysUntilMarket === 0 ? "Today" : daysUntilMarket === 1 ? "Tomorrow" : `${daysUntilMarket} days`})
+            </span>
+          )}
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -94,6 +112,11 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
                 <Archive className="h-4 w-4 mr-1" />
                 Close
               </Button>
+            )}
+            {!canClose && marketDate > today && (
+              <div className="text-xs text-muted-foreground italic">
+                Close available after {new Date(market.date).toLocaleDateString()}
+              </div>
             )}
             <Button variant="outline" size="sm" onClick={() => onEditMarket(market)}>
               <Edit className="h-4 w-4 mr-1" />
@@ -245,10 +268,18 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
 
   const displayedMarkets = showAll ? upcomingMarkets : upcomingMarkets.slice(0, 2);
 
-  // Filter markets by status for the showAll view
-  const pendingMarkets = upcomingMarkets.filter(market => market.status === 'pending');
-  const confirmedMarkets = upcomingMarkets.filter(market => market.status === 'confirmed');
-  const upcomingStatusMarkets = upcomingMarkets.filter(market => market.status === 'upcoming');
+  // Filter markets by status for the showAll view with automatic status logic
+  const getMarketDisplayStatus = (market: any) => {
+    if (market.status === "completed") return "completed";
+    if (market.status === "confirmed") return "confirmed";
+    const daysUntil = Math.ceil((new Date(market.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
+    if (daysUntil <= 30 && daysUntil >= 0) return "upcoming";
+    return market.status;
+  };
+
+  const pendingMarkets = upcomingMarkets.filter(market => getMarketDisplayStatus(market) === 'pending');
+  const confirmedMarkets = upcomingMarkets.filter(market => getMarketDisplayStatus(market) === 'confirmed');
+  const upcomingStatusMarkets = upcomingMarkets.filter(market => getMarketDisplayStatus(market) === 'upcoming');
   const completedMarkets = pastMarkets;
 
   if (showAll) {
