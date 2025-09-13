@@ -99,9 +99,9 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
                 <CheckSquare className="h-4 w-4 mr-2" />
                 Preparation Checklist
               </h3>
-              <span className="text-sm text-muted-foreground">
-                {completedTasks}/{totalTasks} completed
-              </span>
+              <div className="text-sm text-muted-foreground">
+                {completedTasks}/{totalTasks} completed ({Math.round((completedTasks / totalTasks) * 100)}%)
+              </div>
             </div>
             
             <div className="space-y-2">
@@ -118,11 +118,17 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
               ))}
             </div>
             
-            <div className="w-full bg-muted rounded-full h-2 mt-3">
+            <div className="w-full bg-muted rounded-full h-3 mt-3">
               <div 
-                className="bg-primary h-2 rounded-full transition-all duration-300" 
-                style={{ width: `${(completedTasks / totalTasks) * 100}%` }}
-              />
+                className="bg-primary h-3 rounded-full transition-all duration-300 flex items-center justify-end pr-2" 
+                style={{ width: `${totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0}%` }}
+              >
+                {completedTasks > 0 && (
+                  <span className="text-xs text-primary-foreground font-medium">
+                    {Math.round((completedTasks / totalTasks) * 100)}%
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
