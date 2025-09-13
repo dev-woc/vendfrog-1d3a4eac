@@ -148,9 +148,9 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold text-primary">VendorHub</CardTitle>
+          <CardTitle className="text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">VendFrog</CardTitle>
           <CardDescription>
-            Access your vendor management platform
+            Leap into your next Market
           </CardDescription>
         </CardHeader>
         <CardContent>

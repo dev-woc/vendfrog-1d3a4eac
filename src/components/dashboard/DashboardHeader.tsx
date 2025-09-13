@@ -18,7 +18,7 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
       <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center space-x-2 sm:space-x-6">
           <Link to="/" className="hover:opacity-80 transition-opacity">
-            <h1 className="text-xl sm:text-2xl font-bold text-primary">VendorHub</h1>
+            <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">VendFrog</h1>
           </Link>
           
           <nav className="hidden md:flex items-center space-x-3 lg:space-x-4">
