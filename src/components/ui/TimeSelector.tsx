@@ -8,61 +8,49 @@ interface TimeSelectorProps {
 }
 
 export const TimeSelector = ({ value, onChange, placeholder = "Select time" }: TimeSelectorProps) => {
-  // Parse existing value to extract hour, minute, and period
+  // Parse existing value to extract time and period
   const parseTime = (timeString: string) => {
-    if (!timeString) return { hour: "", minute: "", period: "AM" };
+    if (!timeString) return { time: "", period: "AM" };
     
-    const match = timeString.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i);
+    const match = timeString.match(/(\d{1,2}:\d{2})\s*(AM|PM)/i);
     if (match) {
       return {
-        hour: match[1],
-        minute: match[2],
-        period: match[3].toUpperCase()
+        time: match[1],
+        period: match[2].toUpperCase()
       };
     }
-    return { hour: "", minute: "", period: "AM" };
+    return { time: "", period: "AM" };
   };
 
-  const { hour, minute, period } = parseTime(value);
+  const { time, period } = parseTime(value);
 
-  const updateTime = (newHour?: string, newMinute?: string, newPeriod?: string) => {
-    const h = newHour ?? hour;
-    const m = newMinute ?? minute;
+  const updateTime = (newTime?: string, newPeriod?: string) => {
+    const t = newTime ?? time;
     const p = newPeriod ?? period;
     
-    if (h && m && p) {
-      onChange(`${h}:${m} ${p}`);
+    if (t && p) {
+      onChange(`${t} ${p}`);
     }
   };
 
-  // Generate hour options (1-12)
-  const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
-  
-  // Generate minute options (00, 15, 30, 45)
-  const minutes = ["00", "15", "30", "45"];
+  // Generate time options (12:00, 12:15, 12:30, 12:45, 1:00, etc.)
+  const timeOptions = [];
+  for (let hour = 1; hour <= 12; hour++) {
+    for (let minute = 0; minute < 60; minute += 15) {
+      const timeString = `${hour}:${minute.toString().padStart(2, '0')}`;
+      timeOptions.push(timeString);
+    }
+  }
 
   return (
-    <div className="flex gap-1">
-      <Select value={hour} onValueChange={(value) => updateTime(value, undefined, undefined)}>
-        <SelectTrigger className="w-16">
-          <SelectValue placeholder="Hr" />
+    <div className="flex gap-2">
+      <Select value={time} onValueChange={(value) => updateTime(value, undefined)}>
+        <SelectTrigger className="w-20">
+          <SelectValue placeholder="Time" />
         </SelectTrigger>
-        <SelectContent className="bg-background border shadow-md z-50">
-          {hours.map((h) => (
-            <SelectItem key={h} value={h}>{h}</SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      
-      <span className="flex items-center text-sm">:</span>
-      
-      <Select value={minute} onValueChange={(value) => updateTime(undefined, value, undefined)}>
-        <SelectTrigger className="w-16">
-          <SelectValue placeholder="Min" />
-        </SelectTrigger>
-        <SelectContent className="bg-background border shadow-md z-50">
-          {minutes.map((m) => (
-            <SelectItem key={m} value={m}>{m}</SelectItem>
+        <SelectContent className="bg-background border shadow-md z-50 max-h-60">
+          {timeOptions.map((t) => (
+            <SelectItem key={t} value={t}>{t}</SelectItem>
           ))}
         </SelectContent>
       </Select>
@@ -72,8 +60,8 @@ export const TimeSelector = ({ value, onChange, placeholder = "Select time" }: T
           type="button"
           variant={period === "AM" ? "default" : "outline"}
           size="sm"
-          className="h-9 px-2 text-xs rounded-r-none border-r-0"
-          onClick={() => updateTime(undefined, undefined, "AM")}
+          className="h-9 px-3 text-xs rounded-r-none border-r-0"
+          onClick={() => updateTime(undefined, "AM")}
         >
           AM
         </Button>
@@ -81,8 +69,8 @@ export const TimeSelector = ({ value, onChange, placeholder = "Select time" }: T
           type="button"
           variant={period === "PM" ? "default" : "outline"}
           size="sm"
-          className="h-9 px-2 text-xs rounded-l-none"
-          onClick={() => updateTime(undefined, undefined, "PM")}
+          className="h-9 px-3 text-xs rounded-l-none"
+          onClick={() => updateTime(undefined, "PM")}
         >
           PM
         </Button>
