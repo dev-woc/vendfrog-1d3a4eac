@@ -31,6 +31,46 @@ export const MarketsOverviewCard = () => {
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 md:grid-cols-3">
+          {/* Next Market Details */}
+          {nextMarket ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <span className="text-sm font-medium">Next Market</span>
+              </div>
+              <div className="space-y-1">
+                <div className="font-medium text-sm truncate">{nextMarket.name}</div>
+                <div className="text-xs text-muted-foreground">{nextMarket.address.city}, {nextMarket.address.state}</div>
+                <Badge variant="default" className="text-xs">
+                  ${nextMarket.estimatedProfit.toLocaleString()} projected
+                </Badge>
+                {daysUntilNext !== null && (
+                  <div className="mt-2">
+                    <div className="text-lg font-bold text-primary">
+                      {daysUntilNext === 0 
+                        ? "Today!" 
+                        : daysUntilNext === 1 
+                        ? "Tomorrow"
+                        : `${daysUntilNext} days away`
+                      }
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {format(parseISO(nextMarket.date), 'EEEE, MMM d')}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-medium text-muted-foreground">Next Market</span>
+              </div>
+              <div className="text-sm text-muted-foreground">No upcoming markets scheduled</div>
+            </div>
+          )}
+
           {/* Upcoming Markets */}
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -38,21 +78,9 @@ export const MarketsOverviewCard = () => {
               <span className="text-sm font-medium">Upcoming Markets</span>
             </div>
             <div className="text-2xl font-bold">{upcomingMarkets.length}</div>
-            {nextMarket && daysUntilNext !== null && (
-              <div className="space-y-1">
-                <Badge variant="secondary" className="text-xs">
-                  Next: {format(parseISO(nextMarket.date), 'MMM d')}
-                </Badge>
-                <p className="text-xs text-muted-foreground">
-                  {daysUntilNext === 0 
-                    ? "Today!" 
-                    : daysUntilNext === 1 
-                    ? "Tomorrow"
-                    : `${daysUntilNext} days away`
-                  }
-                </p>
-              </div>
-            )}
+            <Badge variant="secondary" className="text-xs">
+              Total scheduled
+            </Badge>
           </div>
 
           {/* Past Markets */}
@@ -66,23 +94,6 @@ export const MarketsOverviewCard = () => {
               Total completed
             </Badge>
           </div>
-
-          {/* Next Market Details */}
-          {nextMarket && (
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium">Next Market</span>
-              </div>
-              <div className="space-y-1">
-                <div className="font-medium text-sm truncate">{nextMarket.name}</div>
-                <div className="text-xs text-muted-foreground">{nextMarket.address.city}, {nextMarket.address.state}</div>
-                <Badge variant="default" className="text-xs">
-                  ${nextMarket.estimatedProfit.toLocaleString()} projected
-                </Badge>
-              </div>
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>
