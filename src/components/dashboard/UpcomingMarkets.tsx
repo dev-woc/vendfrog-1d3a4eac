@@ -69,47 +69,47 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
           <div className="flex items-center text-muted-foreground">
-            <Clock className="h-4 w-4 mr-2" />
-            Load: {market.loadInTime}
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span className="truncate">Load: {market.loadInTime}</span>
           </div>
-          <div className="flex items-center text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2" />
+          <div className="flex items-center text-muted-foreground min-w-0">
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
             <a 
               href={getMapUrl(fullAddress)}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-primary hover:underline cursor-pointer"
+              className="hover:text-primary hover:underline cursor-pointer truncate"
             >
               {market.address.street}, {market.address.city}
             </a>
           </div>
           <div className="flex items-center text-muted-foreground">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Fee: ${market.fee}
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span>Fee: ${market.fee}</span>
           </div>
           <div className="flex items-center text-success">
-            <TrendingUp className="h-4 w-4 mr-2" />
-            Est. ${market.estimatedProfit}
+            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span>Est. ${market.estimatedProfit}</span>
           </div>
         </div>
         
-        <div className="flex items-center text-sm text-muted-foreground border-t pt-3">
-          <Clock className="h-4 w-4 mr-2" />
+        <div className="flex items-center text-xs sm:text-sm text-muted-foreground border-t pt-2 sm:pt-3">
+          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
           <span className="font-medium">Market Hours:</span>
-          <span className="ml-2">{market.marketStartTime} - {market.marketEndTime}</span>
+          <span className="ml-2 truncate">{market.marketStartTime} - {market.marketEndTime}</span>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-muted-foreground">
-            <CheckSquare className="h-4 w-4 mr-2" />
-            Checklist: {completedTasks}/{totalTasks}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
+            <CheckSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span>Checklist: {completedTasks}/{totalTasks}</span>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             {canClose && onCloseMarket && (
-              <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)}>
-                <Archive className="h-4 w-4 mr-1" />
+              <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)} className="min-h-[36px] text-xs">
+                <Archive className="h-3 w-3 mr-1" />
                 Close
               </Button>
             )}
@@ -118,13 +118,16 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket }: {
                 Close available after {new Date(market.date).toLocaleDateString()}
               </div>
             )}
-            <Button variant="outline" size="sm" onClick={() => onEditMarket(market)}>
-              <Edit className="h-4 w-4 mr-1" />
-              Edit
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => onViewDetails(market)}>
-              View Details
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={() => onEditMarket(market)} className="min-h-[36px] text-xs flex-1 sm:flex-none">
+                <Edit className="h-3 w-3 mr-1" />
+                <span className="hidden sm:inline">Edit</span>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => onViewDetails(market)} className="min-h-[36px] text-xs flex-1 sm:flex-none">
+                <span className="hidden sm:inline">View Details</span>
+                <span className="sm:hidden">Details</span>
+              </Button>
+            </div>
           </div>
         </div>
         
@@ -161,38 +164,38 @@ function PastMarketCard({ market }: { market: Market }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4 text-xs sm:text-sm">
           <div className="flex items-center text-muted-foreground">
-            <Clock className="h-4 w-4 mr-2" />
-            {market.marketStartTime} - {market.marketEndTime}
+            <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span className="truncate">{market.marketStartTime} - {market.marketEndTime}</span>
           </div>
           <div className="flex items-center text-muted-foreground">
-            <MapPin className="h-4 w-4 mr-2" />
-            {market.address.city}, {market.address.state}
+            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span className="truncate">{market.address.city}, {market.address.state}</span>
           </div>
           <div className="flex items-center text-muted-foreground">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Fee: ${market.fee}
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span>Fee: ${market.fee}</span>
           </div>
           <div className="flex items-center text-muted-foreground">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Revenue: ${market.actualRevenue || 0}
+            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+            <span>Revenue: ${market.actualRevenue || 0}</span>
           </div>
         </div>
 
-        <div className="border-t pt-3 space-y-2">
-          <div className="flex items-center justify-between text-sm">
+        <div className="border-t pt-2 sm:pt-3 space-y-2">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Estimated Profit:</span>
             <span>${market.estimatedProfit}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Actual Profit:</span>
             <span className="font-medium">${actualProfit}</span>
           </div>
-          <div className="flex items-center justify-between text-sm">
+          <div className="flex items-center justify-between text-xs sm:text-sm">
             <span className="text-muted-foreground">Difference:</span>
             <div className={`flex items-center ${isProfit ? 'text-green-600' : 'text-red-600'}`}>
-              {isProfit ? <TrendingUp className="h-4 w-4 mr-1" /> : <TrendingDown className="h-4 w-4 mr-1" />}
+              {isProfit ? <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 mr-1" /> : <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />}
               {isProfit ? '+' : ''}${profitDifference}
             </div>
           </div>
@@ -431,14 +434,14 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
 
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle className="flex items-center">
-            <Calendar className="h-5 w-5 mr-2" />
+      <CardHeader className="px-3 sm:px-6 pt-3 sm:pt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <CardTitle className="flex items-center text-base sm:text-lg">
+            <Calendar className="h-4 w-4 sm:h-5 sm:w-5 mr-2" />
             Upcoming Markets
           </CardTitle>
-          <Button onClick={() => setShowAddModal(true)} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setShowAddModal(true)} size="sm" className="min-h-[36px] text-xs sm:text-sm self-start sm:self-auto">
+            <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
             Add Market
           </Button>
         </div>
@@ -455,9 +458,9 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
             />
           ))}
           {!showAll && upcomingMarkets.length > 2 && (
-            <div className="pt-4 border-t">
+            <div className="pt-3 sm:pt-4 border-t">
               <Link to="/markets">
-                <Button variant="outline" className="w-full">
+                <Button variant="outline" className="w-full min-h-[44px] text-sm">
                   Show More Markets ({upcomingMarkets.length - 2} more)
                 </Button>
               </Link>
