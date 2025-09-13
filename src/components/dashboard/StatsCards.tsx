@@ -1,6 +1,7 @@
 import { TrendingUp, Calendar, DollarSign, FileText } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useMarkets } from "@/contexts/MarketContext";
+import { Link } from "react-router-dom";
 
 interface StatCardProps {
   title: string;
@@ -8,9 +9,11 @@ interface StatCardProps {
   change?: string;
   trend?: "up" | "down";
   icon: React.ReactNode;
+  linkText?: string;
+  linkTo?: string;
 }
 
-function StatCard({ title, value, change, trend, icon }: StatCardProps) {
+function StatCard({ title, value, change, trend, icon, linkText, linkTo }: StatCardProps) {
   return (
     <Card className="bg-gradient-to-br from-card to-card/80 border border-border/50 shadow-sm hover:shadow-md transition-shadow">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -23,6 +26,14 @@ function StatCard({ title, value, change, trend, icon }: StatCardProps) {
           <p className={`text-xs ${trend === "up" ? "text-success" : "text-destructive"}`}>
             {trend === "up" ? "+" : ""}{change} from last month
           </p>
+        )}
+        {linkText && linkTo && (
+          <Link 
+            to={linkTo} 
+            className="text-xs text-primary hover:underline mt-2 inline-block"
+          >
+            {linkText}
+          </Link>
         )}
       </CardContent>
     </Card>
@@ -57,6 +68,8 @@ export function StatsCards() {
         change={pastMarkets.length > 1 ? "8.2%" : undefined}
         trend="up"
         icon={<DollarSign className="h-4 w-4" />}
+        linkText="View Finances"
+        linkTo="/finance"
       />
       <StatCard
         title="Markets This Month"
@@ -64,6 +77,8 @@ export function StatsCards() {
         change={thisMonthMarkets.length > 0 ? "2" : undefined}
         trend="up"
         icon={<Calendar className="h-4 w-4" />}
+        linkText="View Markets"
+        linkTo="/markets"
       />
       <StatCard
         title="Average Per Market"
@@ -71,6 +86,8 @@ export function StatsCards() {
         change={pastMarkets.length > 1 ? "12.1%" : undefined}
         trend="up"
         icon={<TrendingUp className="h-4 w-4" />}
+        linkText="View Finances"
+        linkTo="/finance"
       />
       <StatCard
         title="Completed Markets"
@@ -78,6 +95,8 @@ export function StatsCards() {
         change={pastMarkets.length > 0 ? "1" : undefined}
         trend="up"
         icon={<FileText className="h-4 w-4" />}
+        linkText="View Markets"
+        linkTo="/markets"
       />
     </div>
   );
