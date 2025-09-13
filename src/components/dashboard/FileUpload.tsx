@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { Upload, FileText, Share2, Check, FolderOpen } from "lucide-react";
+import { Upload, FileText, Share2, Check, FolderOpen, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,6 +42,35 @@ const mockFiles: UploadedFile[] = [
 ];
 
 function FileItem({ file }: { file: UploadedFile }) {
+  const handleDownload = () => {
+    // Create a dummy file for download demonstration
+    const content = `Document: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleShare = () => {
+    const subject = `Shared Document: ${file.name}`;
+    const body = `I'm sharing the following document with you:
+
+Document: ${file.name}
+Type: ${file.type}
+Size: ${file.size}
+Uploaded: ${new Date(file.uploadDate).toLocaleDateString()}
+
+IMPORTANT: Please manually attach the file "${file.name}" to this email before sending.
+
+You can download the file and attach it to share with others.`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
+  };
+
   return (
     <div className="flex items-center justify-between p-3 border rounded-lg bg-muted/20">
       <div className="flex items-center space-x-3">
@@ -54,19 +83,22 @@ function FileItem({ file }: { file: UploadedFile }) {
         </div>
       </div>
       <div className="flex items-center space-x-2">
-        <Badge variant={file.type === "insurance" ? "default" : "secondary"}>
-          {file.type}
-        </Badge>
-        {file.shared ? (
-          <Badge variant="outline" className="text-success border-success">
-            <Check className="h-3 w-3 mr-1" />
-            Shared
-          </Badge>
-        ) : (
-          <Button variant="ghost" size="sm">
-            <Share2 className="h-4 w-4" />
-          </Button>
-        )}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleDownload}
+          className="hover:bg-muted"
+        >
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm"
+          onClick={handleShare}
+          className="hover:bg-muted"
+        >
+          <Share2 className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
