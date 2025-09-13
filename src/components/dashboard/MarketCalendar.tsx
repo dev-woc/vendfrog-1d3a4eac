@@ -58,6 +58,22 @@ export const MarketCalendar = () => {
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Legend */}
+        <div className="flex items-center gap-6 mb-4 p-3 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-primary"></div>
+            <span className="text-sm text-muted-foreground">Market Scheduled</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full border-2 border-muted-foreground bg-background"></div>
+            <span className="text-sm text-muted-foreground">Available Date</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 rounded-full bg-muted"></div>
+            <span className="text-sm text-muted-foreground">Past Date</span>
+          </div>
+        </div>
+
         <div className="grid gap-4 lg:grid-cols-4">
           {/* Calendar - stretched to take more space */}
           <div className="lg:col-span-3">
@@ -73,7 +89,9 @@ export const MarketCalendar = () => {
                 hasMarket: {
                   backgroundColor: 'hsl(var(--primary))',
                   color: 'hsl(var(--primary-foreground))',
-                  fontWeight: 'bold'
+                  fontWeight: 'bold',
+                  borderRadius: '50%',
+                  border: '2px solid hsl(var(--primary))'
                 }
               }}
               disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
