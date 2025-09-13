@@ -13,6 +13,7 @@ const Auth = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -122,10 +123,7 @@ const Auth = () => {
           });
         }
       } else {
-        toast({
-          title: "Account Created",
-          description: "Please check your email to confirm your account.",
-        });
+        setShowSuccessMessage(true);
         // Clear form
         setSignupEmail("");
         setSignupPassword("");
@@ -143,6 +141,41 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  if (showSuccessMessage) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-md animate-scale-in">
+          <Card className="border-primary/20 shadow-2xl">
+            <CardContent className="p-8 text-center space-y-6">
+              <div className="animate-bounce">
+                <div className="mx-auto w-16 h-16 bg-gradient-to-r from-primary to-primary/70 rounded-full flex items-center justify-center mb-4">
+                  <span className="text-2xl">🐸</span>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent animate-fade-in">
+                  Thanks!
+                </h1>
+                <p className="text-lg font-semibold animate-fade-in animation-delay-200">
+                  Time to leap into the next dimension!
+                </p>
+                <p className="text-muted-foreground animate-fade-in animation-delay-400">
+                  Check your email to verify your account and start your VendFrog journey.
+                </p>
+              </div>
+              <Button 
+                onClick={() => setShowSuccessMessage(false)}
+                className="w-full animate-fade-in animation-delay-600"
+              >
+                Back to Login
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">

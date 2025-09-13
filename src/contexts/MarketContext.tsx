@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Market } from '@/types/market';
+import { supabase } from '@/integrations/supabase/client';
 
 const initialMarkets: Market[] = [
   {
@@ -155,7 +156,30 @@ interface MarketContextType {
 const MarketContext = createContext<MarketContextType | undefined>(undefined);
 
 export function MarketProvider({ children }: { children: ReactNode }) {
-  const [markets, setMarkets] = useState<Market[]>(initialMarkets);
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [isNewUser, setIsNewUser] = useState(true);
+
+  // Check if user is new or returning
+  useEffect(() => {
+    const checkUserStatus = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // For demo purposes, we'll check if user has been here before using localStorage
+        // In a real app, you'd check their profile or market history in the database
+        const hasVisitedBefore = localStorage.getItem(`user_${user.id}_visited`);
+        if (!hasVisitedBefore) {
+          setIsNewUser(true);
+          setMarkets([]); // No sample data for new users
+        } else {
+          setIsNewUser(false);
+          setMarkets(initialMarkets); // Show sample data for returning users
+        }
+        localStorage.setItem(`user_${user.id}_visited`, 'true');
+      }
+    };
+
+    checkUserStatus();
+  }, []);
 
   const updateMarketChecklist = (marketId: string, checklistItemId: string) => {
     setMarkets(prev => prev.map(market => 
