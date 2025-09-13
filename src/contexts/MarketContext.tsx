@@ -21,12 +21,12 @@ const initialMarkets: Market[] = [
     status: "confirmed",
     organizerContact: "sarah@downtownmarket.com",
     requirements: ["Valid business license", "Liability insurance", "Setup by 7:30 AM"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: false,
-      setup: false,
-    },
+    checklist: [
+      { id: "insurance", label: "Insurance Documents", completed: true },
+      { id: "permit", label: "Business Permit", completed: true },
+      { id: "inventory", label: "Inventory Prepared", completed: false },
+      { id: "setup", label: "Setup Plan Ready", completed: false },
+    ],
   },
   {
     id: "2",
@@ -47,12 +47,12 @@ const initialMarkets: Market[] = [
     status: "upcoming",
     organizerContact: "info@artisanfair.org",
     requirements: ["Handmade items only", "Tent required", "Insurance certificate"],
-    checklist: {
-      insurance: true,
-      permit: false,
-      inventory: false,
-      setup: false,
-    },
+    checklist: [
+      { id: "insurance", label: "Insurance Documents", completed: true },
+      { id: "permit", label: "Business Permit", completed: false },
+      { id: "inventory", label: "Inventory Prepared", completed: false },
+      { id: "setup", label: "Setup Plan Ready", completed: false },
+    ],
   },
   {
     id: "3",
@@ -73,12 +73,12 @@ const initialMarkets: Market[] = [
     status: "pending",
     organizerContact: "events@harbordistrict.com",
     requirements: ["Holiday themed products", "Lighting setup", "Extended hours"],
-    checklist: {
-      insurance: false,
-      permit: false,
-      inventory: false,
-      setup: false,
-    },
+    checklist: [
+      { id: "insurance", label: "Insurance Documents", completed: false },
+      { id: "permit", label: "Business Permit", completed: false },
+      { id: "inventory", label: "Inventory Prepared", completed: false },
+      { id: "setup", label: "Setup Plan Ready", completed: false },
+    ],
   },
   // Past markets
   {
@@ -101,12 +101,12 @@ const initialMarkets: Market[] = [
     status: "completed",
     organizerContact: "events@festivalsquare.com",
     requirements: ["Holiday-themed products", "Festive decorations"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: true,
-      setup: true,
-    },
+    checklist: [
+      { id: "insurance", label: "Insurance Documents", completed: true },
+      { id: "permit", label: "Business Permit", completed: true },
+      { id: "inventory", label: "Inventory Prepared", completed: true },
+      { id: "setup", label: "Setup Plan Ready", completed: true },
+    ],
     completed: true,
     completedDate: "2023-12-15",
   },
@@ -130,12 +130,12 @@ const initialMarkets: Market[] = [
     status: "completed",
     organizerContact: "info@communitycenter.org",
     requirements: ["Handmade crafts only", "Setup by 7:30 AM"],
-    checklist: {
-      insurance: true,
-      permit: true,
-      inventory: true,
-      setup: true,
-    },
+    checklist: [
+      { id: "insurance", label: "Insurance Documents", completed: true },
+      { id: "permit", label: "Business Permit", completed: true },
+      { id: "inventory", label: "Inventory Prepared", completed: true },
+      { id: "setup", label: "Setup Plan Ready", completed: true },
+    ],
     completed: true,
     completedDate: "2023-10-28",
   }
@@ -144,7 +144,7 @@ const initialMarkets: Market[] = [
 interface MarketContextType {
   markets: Market[];
   setMarkets: React.Dispatch<React.SetStateAction<Market[]>>;
-  updateMarketChecklist: (marketId: string, item: keyof Market['checklist']) => void;
+  updateMarketChecklist: (marketId: string, checklistItemId: string) => void;
   addMarket: (market: Market) => void;
   updateMarket: (market: Market) => void;
   closeMarket: (marketId: string, actualRevenue: number) => void;
@@ -157,10 +157,17 @@ const MarketContext = createContext<MarketContextType | undefined>(undefined);
 export function MarketProvider({ children }: { children: ReactNode }) {
   const [markets, setMarkets] = useState<Market[]>(initialMarkets);
 
-  const updateMarketChecklist = (marketId: string, item: keyof Market['checklist']) => {
+  const updateMarketChecklist = (marketId: string, checklistItemId: string) => {
     setMarkets(prev => prev.map(market => 
       market.id === marketId 
-        ? { ...market, checklist: { ...market.checklist, [item]: !market.checklist[item] } }
+        ? { 
+            ...market, 
+            checklist: market.checklist.map(item => 
+              item.id === checklistItemId 
+                ? { ...item, completed: !item.completed }
+                : item
+            )
+          }
         : market
     ));
   };

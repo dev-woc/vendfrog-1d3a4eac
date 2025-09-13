@@ -38,6 +38,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     status: "pending" as "pending" | "confirmed" | "upcoming",
     organizerContact: "",
     requirements: "",
+    checklistItems: [] as { id: string; label: string }[],
   });
 
   // Reset form when modal opens/closes or when editingMarket changes
@@ -62,6 +63,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         status: editingMarket.status || "pending",
         organizerContact: editingMarket.organizerContact || "",
         requirements: editingMarket.requirements?.join('\n') || "",
+        checklistItems: editingMarket.checklist?.map((item: any) => ({ id: item.id, label: item.label })) || [],
       });
     } else if (open && !editingMarket) {
       // Reset form for new market
@@ -83,6 +85,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         status: "pending",
         organizerContact: "",
         requirements: "",
+        checklistItems: [],
       });
     }
   }, [open, editingMarket]);
@@ -96,6 +99,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
       date: formData.date?.toISOString().split('T')[0] || "",
       requirements: formData.requirements ? formData.requirements.split('\n').filter(req => req.trim()) : [],
+      checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
     };
 
     if (editingMarket) {
@@ -110,12 +114,6 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       const newMarket = {
         id: Date.now().toString(),
         ...marketData,
-        checklist: {
-          insurance: false,
-          permit: false,
-          inventory: false,
-          setup: false,
-        },
       };
       onAddMarket?.(newMarket);
     }
@@ -330,6 +328,77 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
               placeholder="Valid business license&#10;Liability insurance&#10;Food handler's permit"
               rows={3}
             />
+          </div>
+
+          {/* Checklist Items */}
+          <div>
+            <Label>Preparation Checklist</Label>
+            <div className="space-y-2 mt-2">
+              {formData.checklistItems.map((item, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={item.label}
+                    onChange={(e) => {
+                      const newItems = [...formData.checklistItems];
+                      newItems[index] = { ...item, label: e.target.value };
+                      setFormData(prev => ({ ...prev, checklistItems: newItems }));
+                    }}
+                    placeholder="Enter checklist item"
+                    className="flex-1"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const newItems = formData.checklistItems.filter((_, i) => i !== index);
+                      setFormData(prev => ({ ...prev, checklistItems: newItems }));
+                    }}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  const newItem = { id: Date.now().toString(), label: "" };
+                  setFormData(prev => ({ ...prev, checklistItems: [...prev.checklistItems, newItem] }));
+                }}
+                className="w-full"
+              >
+                Add Checklist Item
+              </Button>
+              
+              {formData.checklistItems.length === 0 && (
+                <div className="flex gap-2 flex-wrap">
+                  {[
+                    "Insurance Documents",
+                    "Business Permit", 
+                    "Inventory Prepared",
+                    "Setup Plan Ready",
+                    "Payment Confirmed",
+                    "Transportation Arranged"
+                  ].map((suggestion) => (
+                    <Button
+                      key={suggestion}
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const newItem = { id: Date.now().toString(), label: suggestion };
+                        setFormData(prev => ({ ...prev, checklistItems: [...prev.checklistItems, newItem] }));
+                      }}
+                    >
+                      + {suggestion}
+                    </Button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex gap-2 pt-4">

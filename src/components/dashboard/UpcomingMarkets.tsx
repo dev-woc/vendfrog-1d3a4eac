@@ -131,14 +131,18 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
     setShowDetails(true);
   };
 
-  const handleUpdateChecklist = (marketId: string, item: keyof Market['checklist']) => {
-    updateMarketChecklist(marketId, item);
+  const handleUpdateChecklist = (marketId: string, checklistItemId: string) => {
+    updateMarketChecklist(marketId, checklistItemId);
     
     // Update selected market if it's the one being modified
     if (selectedMarket?.id === marketId) {
       setSelectedMarket(prev => prev ? {
         ...prev,
-        checklist: { ...prev.checklist, [item]: !prev.checklist[item] }
+        checklist: prev.checklist.map(item => 
+          item.id === checklistItemId 
+            ? { ...item, completed: !item.completed }
+            : item
+        )
       } : null);
     }
   };

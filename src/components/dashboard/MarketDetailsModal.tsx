@@ -10,14 +10,14 @@ interface MarketDetailsModalProps {
   market: Market | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdateChecklist: (marketId: string, item: keyof Market['checklist']) => void;
+  onUpdateChecklist: (marketId: string, checklistItemId: string) => void;
 }
 
 export function MarketDetailsModal({ market, open, onOpenChange, onUpdateChecklist }: MarketDetailsModalProps) {
   if (!market) return null;
 
-  const completedTasks = Object.values(market.checklist).filter(Boolean).length;
-  const totalTasks = Object.keys(market.checklist).length;
+  const completedTasks = market.checklist.filter(item => item.completed).length;
+  const totalTasks = market.checklist.length;
   
   // Create full address string for display and mapping
   const fullAddress = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}${market.address.country ? `, ${market.address.country}` : ''}`;
@@ -87,17 +87,14 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
             </div>
             
             <div className="space-y-2">
-              {Object.entries(market.checklist).map(([item, completed]) => (
-                <div key={item} className="flex items-center space-x-2">
+              {market.checklist.map((item) => (
+                <div key={item.id} className="flex items-center space-x-2">
                   <Checkbox 
-                    checked={completed}
-                    onCheckedChange={() => onUpdateChecklist(market.id, item as keyof Market['checklist'])}
+                    checked={item.completed}
+                    onCheckedChange={() => onUpdateChecklist(market.id, item.id)}
                   />
-                  <label className="text-sm capitalize">
-                    {item === 'insurance' ? 'Insurance Documents' : 
-                     item === 'permit' ? 'Business Permit' :
-                     item === 'inventory' ? 'Inventory Prepared' :
-                     'Setup Plan Ready'}
+                  <label className="text-sm">
+                    {item.label}
                   </label>
                 </div>
               ))}

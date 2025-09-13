@@ -17,11 +17,10 @@ export interface Market {
   actualRevenue?: number;
   status: "upcoming" | "confirmed" | "pending" | "completed";
   checklist: {
-    insurance: boolean;
-    permit: boolean;
-    inventory: boolean;
-    setup: boolean;
-  };
+    id: string;
+    label: string;
+    completed: boolean;
+  }[];
   description?: string;
   organizerContact?: string;
   requirements?: string[];
