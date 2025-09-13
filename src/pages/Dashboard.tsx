@@ -3,6 +3,7 @@ import { StatsCards } from "@/components/dashboard/StatsCards";
 import { UpcomingMarkets } from "@/components/dashboard/UpcomingMarkets";
 import { FileUpload } from "@/components/dashboard/FileUpload";
 import { RevenueChart } from "@/components/dashboard/RevenueChart";
+import { MarketCalendar } from "@/components/dashboard/MarketCalendar";
 import { BreadcrumbNav } from "@/components/navigation/BreadcrumbNav";
 
 const Dashboard = () => {
@@ -28,6 +29,8 @@ const Dashboard = () => {
             <FileUpload />
           </div>
         </div>
+        
+        <MarketCalendar />
         
         <RevenueChart />
       </main>
