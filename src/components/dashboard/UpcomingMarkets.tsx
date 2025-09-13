@@ -245,6 +245,12 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
 
   const displayedMarkets = showAll ? upcomingMarkets : upcomingMarkets.slice(0, 2);
 
+  // Filter markets by status for the showAll view
+  const pendingMarkets = upcomingMarkets.filter(market => market.status === 'pending');
+  const confirmedMarkets = upcomingMarkets.filter(market => market.status === 'confirmed');
+  const upcomingStatusMarkets = upcomingMarkets.filter(market => market.status === 'upcoming');
+  const completedMarkets = pastMarkets;
+
   if (showAll) {
     return (
       <Card>
@@ -261,13 +267,16 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="upcoming" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="upcoming">Upcoming Markets ({upcomingMarkets.length})</TabsTrigger>
-              <TabsTrigger value="past">Past Markets ({pastMarkets.length})</TabsTrigger>
+          <Tabs defaultValue="all-upcoming" className="space-y-4">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="all-upcoming">All Upcoming ({upcomingMarkets.length})</TabsTrigger>
+              <TabsTrigger value="pending">Pending ({pendingMarkets.length})</TabsTrigger>
+              <TabsTrigger value="confirmed">Confirmed ({confirmedMarkets.length})</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming ({upcomingStatusMarkets.length})</TabsTrigger>
+              <TabsTrigger value="completed">Completed ({completedMarkets.length})</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="upcoming">
+            <TabsContent value="all-upcoming">
               <div className="space-y-4">
                 {upcomingMarkets.map((market) => (
                   <MarketCard 
@@ -289,12 +298,69 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
               </div>
             </TabsContent>
             
-            <TabsContent value="past">
+            <TabsContent value="pending">
               <div className="space-y-4">
-                {pastMarkets.map((market) => (
+                {pendingMarkets.map((market) => (
+                  <MarketCard 
+                    key={market.id} 
+                    market={market} 
+                    onViewDetails={handleViewDetails} 
+                    onEditMarket={handleEditMarket}
+                    onCloseMarket={handleCloseMarket}
+                  />
+                ))}
+                {pendingMarkets.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No pending markets.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="confirmed">
+              <div className="space-y-4">
+                {confirmedMarkets.map((market) => (
+                  <MarketCard 
+                    key={market.id} 
+                    market={market} 
+                    onViewDetails={handleViewDetails} 
+                    onEditMarket={handleEditMarket}
+                    onCloseMarket={handleCloseMarket}
+                  />
+                ))}
+                {confirmedMarkets.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No confirmed markets.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="upcoming">
+              <div className="space-y-4">
+                {upcomingStatusMarkets.map((market) => (
+                  <MarketCard 
+                    key={market.id} 
+                    market={market} 
+                    onViewDetails={handleViewDetails} 
+                    onEditMarket={handleEditMarket}
+                    onCloseMarket={handleCloseMarket}
+                  />
+                ))}
+                {upcomingStatusMarkets.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">No upcoming status markets.</p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="completed">
+              <div className="space-y-4">
+                {completedMarkets.map((market) => (
                   <PastMarketCard key={market.id} market={market} />
                 ))}
-                {pastMarkets.length === 0 && (
+                {completedMarkets.length === 0 && (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">No completed markets yet.</p>
                     <p className="text-sm text-muted-foreground mt-1">
