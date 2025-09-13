@@ -1,6 +1,7 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, Edit } from "lucide-react";
 import { Market } from "@/types/market";
 import { useToast } from "@/hooks/use-toast";
 
@@ -9,9 +10,10 @@ interface ChecklistModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdateChecklist: (marketId: string, checklistItemId: string) => void;
+  onEditMarket?: (market: Market) => void;
 }
 
-export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist }: ChecklistModalProps) {
+export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, onEditMarket }: ChecklistModalProps) {
   const { toast } = useToast();
   
   if (!market) return null;
@@ -91,6 +93,19 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist }
             </div>
           )}
         </div>
+        
+        <DialogFooter className="border-t pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              onEditMarket?.(market);
+              onOpenChange(false);
+            }}
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Market
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

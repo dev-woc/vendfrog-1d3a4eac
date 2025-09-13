@@ -115,6 +115,10 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
               <CheckSquare className="h-3 w-3 mr-1" />
               View Checklist
             </Button>
+            <Button variant="outline" size="sm" onClick={() => onEditMarket?.(market)} className="min-h-[36px] text-xs">
+              <Edit className="h-3 w-3 mr-1" />
+              Edit
+            </Button>
             {canClose && onCloseMarket && (
               <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)} className="min-h-[36px] text-xs">
                 <Archive className="h-3 w-3 mr-1" />
@@ -122,16 +126,10 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
               </Button>
             )}
             {!canClose && marketDate > today && (
-              <>
-                <Button variant="outline" size="sm" onClick={() => onViewDetails?.(market)} className="min-h-[36px] text-xs">
-                  <Eye className="h-3 w-3 mr-1" />
-                  Details
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => onEditMarket?.(market)} className="min-h-[36px] text-xs">
-                  <Edit className="h-3 w-3 mr-1" />
-                  Edit
-                </Button>
-              </>
+              <Button variant="outline" size="sm" onClick={() => onViewDetails?.(market)} className="min-h-[36px] text-xs">
+                <Eye className="h-3 w-3 mr-1" />
+                Details
+              </Button>
             )}
           </div>
         </div>
@@ -320,6 +318,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
           open={isDetailsModalOpen}
           onOpenChange={setIsDetailsModalOpen}
           onUpdateChecklist={updateMarketChecklist}
+          onEditMarket={handleEditMarket}
         />
 
         <ChecklistModal
@@ -327,6 +326,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
           open={isChecklistModalOpen}
           onOpenChange={setIsChecklistModalOpen}
           onUpdateChecklist={updateMarketChecklist}
+          onEditMarket={handleEditMarket}
         />
 
         <AddMarketModal
@@ -419,6 +419,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         open={isDetailsModalOpen}
         onOpenChange={setIsDetailsModalOpen}
         onUpdateChecklist={updateMarketChecklist}
+        onEditMarket={handleEditMarket}
       />
 
       <ChecklistModal
@@ -426,6 +427,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         open={isChecklistModalOpen}
         onOpenChange={setIsChecklistModalOpen}
         onUpdateChecklist={updateMarketChecklist}
+        onEditMarket={handleEditMarket}
       />
 
       <AddMarketModal

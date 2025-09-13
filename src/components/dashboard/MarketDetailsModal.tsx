@@ -1,8 +1,8 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MapPin, Clock, DollarSign, CheckSquare, ExternalLink } from "lucide-react";
+import { MapPin, Clock, DollarSign, CheckSquare, ExternalLink, Edit } from "lucide-react";
 import { getMapUrl } from "@/lib/utils";
 import { Market } from "@/types/market";
 import { useToast } from "@/hooks/use-toast";
@@ -12,9 +12,10 @@ interface MarketDetailsModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onUpdateChecklist: (marketId: string, checklistItemId: string) => void;
+  onEditMarket?: (market: Market) => void;
 }
 
-export function MarketDetailsModal({ market, open, onOpenChange, onUpdateChecklist }: MarketDetailsModalProps) {
+export function MarketDetailsModal({ market, open, onOpenChange, onUpdateChecklist, onEditMarket }: MarketDetailsModalProps) {
   const { toast } = useToast();
   
   if (!market) return null;
@@ -171,6 +172,20 @@ export function MarketDetailsModal({ market, open, onOpenChange, onUpdateCheckli
             </Button>
           </div>
         </div>
+        
+        <DialogFooter className="border-t pt-4">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              onEditMarket?.(market);
+              onOpenChange(false);
+            }}
+            className="w-full"
+          >
+            <Edit className="h-4 w-4 mr-2" />
+            Edit Market Details
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
