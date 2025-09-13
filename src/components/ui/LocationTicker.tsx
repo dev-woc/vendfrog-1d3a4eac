@@ -60,7 +60,7 @@ export function LocationTicker() {
   const formattedTime = formatInTimeZone(
     currentTime, 
     location.timezone, 
-    'HH:mm:ss'
+    'h:mm:ss a'
   );
   
   const formattedDate = formatInTimeZone(

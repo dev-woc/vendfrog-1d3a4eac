@@ -10,9 +10,9 @@ const Documents = () => {
         <BreadcrumbNav />
         
         <div className="flex flex-col space-y-1">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Documents</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">File Management</h2>
           <p className="text-sm sm:text-base text-muted-foreground">
-            Manage all your business documents, permits, and certifications.
+            Upload and organize your business files, logos, insurance, permits, and contracts.
           </p>
         </div>
         

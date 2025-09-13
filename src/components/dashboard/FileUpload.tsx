@@ -14,32 +14,8 @@ interface UploadedFile {
   shared: boolean;
 }
 
-const mockFiles: UploadedFile[] = [
-  {
-    id: "1",
-    name: "vendor-insurance-2024.pdf",
-    size: "2.4 MB",
-    uploadDate: "2024-01-10",
-    type: "insurance",
-    shared: true,
-  },
-  {
-    id: "2",
-    name: "business-permit.pdf",
-    size: "1.1 MB",
-    uploadDate: "2024-01-08",
-    type: "permit",
-    shared: false,
-  },
-  {
-    id: "3",
-    name: "food-handler-cert.pdf",
-    size: "875 KB",
-    uploadDate: "2024-01-05",
-    type: "certification",
-    shared: true,
-  },
-];
+// Empty array for new users - no pre-populated files
+const mockFiles: UploadedFile[] = [];
 
 function FileItem({ file }: { file: UploadedFile }) {
   const handleDownload = () => {
@@ -150,7 +126,7 @@ export function FileUpload() {
       <CardHeader>
         <CardTitle className="flex items-center">
           <Upload className="h-5 w-5 mr-2" />
-          Document Management
+          File Management
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -175,9 +151,11 @@ export function FileUpload() {
             className="hidden"
           />
           <Upload className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2" />
-          <p className="text-sm font-medium">Drop files here or click to upload</p>
-          <p className="text-xs text-muted-foreground mt-1 px-2">
-            Insurance documents, permits, certifications (PDF, JPG, PNG)
+          <p className="text-sm font-medium">Upload & Organize Your Business Files</p>
+          <p className="text-xs text-muted-foreground mt-1 px-2 leading-relaxed">
+            Save and upload logos for organizers, insurance documents, permits, 
+            certifications, and contracts all in one place for easy access when 
+            organizers need them.
           </p>
           
           <div className="flex justify-center mt-4">
@@ -188,15 +166,22 @@ export function FileUpload() {
           </div>
         </div>
         
-        <div className="space-y-2">
-          <h4 className="text-sm font-medium">Recent Documents</h4>
-          {mockFiles.map((file) => (
-            <FileItem key={file.id} file={file} />
-          ))}
-        </div>
+        {mockFiles.length > 0 ? (
+          <div className="space-y-2">
+            <h4 className="text-sm font-medium">Recent Files</h4>
+            {mockFiles.map((file) => (
+              <FileItem key={file.id} file={file} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-4 text-muted-foreground">
+            <p className="text-sm">No files uploaded yet</p>
+            <p className="text-xs">Upload your first file to get started</p>
+          </div>
+        )}
         
         <Button className="w-full min-h-[44px]" variant="outline" asChild>
-          <Link to="/documents">View All Documents</Link>
+          <Link to="/documents">Manage All Files</Link>
         </Button>
       </CardContent>
     </Card>
