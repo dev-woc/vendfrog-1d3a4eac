@@ -1,16 +1,25 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useMarkets } from "@/contexts/MarketContext";
+import { MarketDetailsModal } from "@/components/dashboard/MarketDetailsModal";
 import { format, parseISO } from "date-fns";
 import { Calendar, TrendingUp, DollarSign } from "lucide-react";
 
 export const UpcomingProjections = () => {
-  const { getUpcomingMarkets } = useMarkets();
+  const { getUpcomingMarkets, updateMarketChecklist } = useMarkets();
+  const [selectedMarket, setSelectedMarket] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const upcomingMarkets = getUpcomingMarkets();
   
   const totalEstimatedRevenue = upcomingMarkets.reduce((sum, market) => sum + market.estimatedProfit, 0);
   const totalUpcomingFees = upcomingMarkets.reduce((sum, market) => sum + market.fee, 0);
   const projectedProfit = totalEstimatedRevenue - totalUpcomingFees;
+
+  const handleMarketClick = (market: any) => {
+    setSelectedMarket(market);
+    setIsModalOpen(true);
+  };
 
   return (
     <Card>
@@ -54,7 +63,11 @@ export const UpcomingProjections = () => {
               {upcomingMarkets.map(market => {
                 const projectedMarketProfit = market.estimatedProfit - market.fee;
                 return (
-                  <div key={market.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div 
+                    key={market.id} 
+                    className="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => handleMarketClick(market)}
+                  >
                     <div className="space-y-1">
                       <div className="font-medium">{market.name}</div>
                       <div className="text-sm text-muted-foreground">
@@ -86,6 +99,13 @@ export const UpcomingProjections = () => {
             </div>
           )}
         </div>
+
+        <MarketDetailsModal
+          market={selectedMarket}
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          onUpdateChecklist={updateMarketChecklist}
+        />
       </CardContent>
     </Card>
   );
