@@ -14,7 +14,7 @@ export function DashboardHeader({ vendorName = "Sarah Johnson" }: DashboardHeade
   const { setTheme, theme } = useTheme();
 
   return (
-    <header className="border-b bg-card/50 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur-sm">
       <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
         <div className="flex items-center space-x-2 sm:space-x-6">
           <Link to="/" className="hover:opacity-80 transition-opacity">

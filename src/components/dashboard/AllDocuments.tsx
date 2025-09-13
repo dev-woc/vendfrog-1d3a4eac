@@ -115,24 +115,30 @@ You can download the file and attach it to share with others.`;
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex items-start justify-between">
-          <div className="flex items-start space-x-3">
-            <FileText className="h-10 w-10 text-muted-foreground mt-1" />
-            <div className="flex-1">
-              <h3 className="font-medium text-sm">{file.name}</h3>
+      <CardContent className="p-3 sm:p-4">
+        <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+          <div className="flex items-start space-x-3 min-w-0 flex-1">
+            <FileText className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground mt-1 shrink-0" />
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium text-sm truncate">{file.name}</h3>
               <p className="text-xs text-muted-foreground">
                 {file.size} • Uploaded {new Date(file.uploadDate).toLocaleDateString()}
               </p>
+              <Badge 
+                variant={getTypeColor(file.type) as any}
+                className="text-xs mt-1"
+              >
+                {file.type}
+              </Badge>
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2 self-end sm:self-auto shrink-0">
             <Button 
               variant="ghost" 
               size="sm" 
               onClick={handleDownload}
-              className="hover:bg-muted"
+              className="hover:bg-muted min-h-[40px] min-w-[40px]"
             >
               <Download className="h-4 w-4" />
             </Button>
@@ -140,7 +146,7 @@ You can download the file and attach it to share with others.`;
               variant="ghost" 
               size="sm"
               onClick={handleShare}
-              className="hover:bg-muted"
+              className="hover:bg-muted min-h-[40px] min-w-[40px]"
             >
               <Share2 className="h-4 w-4" />
             </Button>
@@ -193,15 +199,15 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
           </CardHeader>
           <CardContent>
             <div 
-              className="border-2 border-dashed rounded-lg p-6 text-center border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer"
+              className="border-2 border-dashed rounded-lg p-4 sm:p-6 text-center border-muted-foreground/25 hover:border-muted-foreground/50 transition-colors cursor-pointer"
               onClick={triggerFileSelect}
             >
-              <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-2" />
+              <Upload className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2" />
               <p className="text-sm font-medium">Drop files here or click to upload</p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="text-xs text-muted-foreground mt-1 px-2">
                 Insurance documents, permits, certifications (PDF, JPG, PNG)
               </p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={triggerFileSelect}>
+              <Button variant="outline" size="sm" className="mt-4 min-h-[44px]" onClick={triggerFileSelect}>
                 Browse Files
               </Button>
               <input
@@ -217,17 +223,17 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
         </Card>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
         <Input
           placeholder="Search documents..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-1"
+          className="flex-1 min-h-[44px]"
         />
         <select
           value={filterType}
           onChange={(e) => setFilterType(e.target.value)}
-          className="px-3 py-2 border border-input bg-background rounded-md text-sm"
+          className="px-3 py-2 border border-input bg-background rounded-md text-sm min-h-[44px] min-w-[120px]"
         >
           {documentTypes.map((type) => (
             <option key={type} value={type}>
@@ -238,12 +244,12 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
       </div>
 
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold">
+        <h3 className="text-base sm:text-lg font-semibold">
           All Documents ({filteredFiles.length})
         </h3>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3 sm:gap-4">
         {filteredFiles.map((file) => (
           <DocumentItem key={file.id} file={file} />
         ))}
@@ -251,10 +257,10 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
 
       {filteredFiles.length === 0 && (
         <Card>
-          <CardContent className="p-8 text-center">
-            <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium mb-2">No documents found</h3>
-            <p className="text-muted-foreground">
+          <CardContent className="p-6 sm:p-8 text-center">
+            <FileText className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-base sm:text-lg font-medium mb-2">No documents found</h3>
+            <p className="text-sm text-muted-foreground">
               {searchTerm || filterType !== "all"
                 ? "Try adjusting your search or filter criteria."
                 : "Upload your first document to get started."}
