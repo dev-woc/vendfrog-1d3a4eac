@@ -121,30 +121,28 @@ You can download the file and attach it to share with others.`;
             <FileText className="h-10 w-10 text-muted-foreground mt-1" />
             <div className="flex-1">
               <h3 className="font-medium text-sm">{file.name}</h3>
-              <p className="text-xs text-muted-foreground mb-2">
+              <p className="text-xs text-muted-foreground">
                 {file.size} • Uploaded {new Date(file.uploadDate).toLocaleDateString()}
               </p>
-              <div className="flex items-center space-x-2">
-                <Badge variant={getTypeColor(file.type)}>
-                  {file.type}
-                </Badge>
-              </div>
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
-            <Button variant="ghost" size="sm" onClick={handleDownload}>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleDownload}
+              className="hover:bg-muted"
+            >
               <Download className="h-4 w-4" />
             </Button>
             <Button 
               variant="ghost" 
               size="sm"
               onClick={handleShare}
+              className="hover:bg-muted"
             >
               <Share2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm">
-              <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
