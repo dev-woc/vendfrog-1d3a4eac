@@ -1,6 +1,8 @@
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { BreadcrumbNav } from "@/components/navigation/BreadcrumbNav";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { FinancialOverview } from "@/components/finance/FinancialOverview";
+import { MonthlyBreakdown } from "@/components/finance/MonthlyBreakdown";
+import { UpcomingProjections } from "@/components/finance/UpcomingProjections";
 
 const Finance = () => {
   return (
@@ -16,19 +18,12 @@ const Finance = () => {
           </p>
         </div>
         
-        <Card>
-          <CardHeader>
-            <CardTitle>Financial Overview</CardTitle>
-            <CardDescription>
-              Your complete financial dashboard coming soon.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">
-              Financial features will be available here including profit tracking, expense management, tax summaries, and more.
-            </p>
-          </CardContent>
-        </Card>
+        <FinancialOverview />
+        
+        <div className="grid gap-6 lg:grid-cols-2">
+          <MonthlyBreakdown />
+          <UpcomingProjections />
+        </div>
       </main>
     </div>
   );
