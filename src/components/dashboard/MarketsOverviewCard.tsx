@@ -18,6 +18,12 @@ export const MarketsOverviewCard = () => {
     ? differenceInDays(parseISO(nextMarket.date), new Date())
     : null;
 
+  // Calculate status counts for upcoming markets
+  const statusCounts = upcomingMarkets.reduce((counts, market) => {
+    counts[market.status] = (counts[market.status] || 0) + 1;
+    return counts;
+  }, {} as Record<string, number>);
+
   return (
     <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
       <CardHeader>
@@ -78,9 +84,23 @@ export const MarketsOverviewCard = () => {
               <span className="text-sm font-medium">Upcoming Markets</span>
             </div>
             <div className="text-2xl font-bold">{upcomingMarkets.length}</div>
-            <Badge variant="secondary" className="text-xs">
-              Total scheduled
-            </Badge>
+            <div className="flex flex-wrap gap-1 mt-2">
+              {statusCounts.confirmed && (
+                <Badge variant="default" className="text-xs">
+                  {statusCounts.confirmed} Confirmed
+                </Badge>
+              )}
+              {statusCounts.pending && (
+                <Badge variant="secondary" className="text-xs">
+                  {statusCounts.pending} Pending
+                </Badge>
+              )}
+              {statusCounts.upcoming && (
+                <Badge variant="outline" className="text-xs">
+                  {statusCounts.upcoming} Upcoming
+                </Badge>
+              )}
+            </div>
           </div>
 
           {/* Past Markets */}
