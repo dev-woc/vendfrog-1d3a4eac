@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useMarkets } from "@/contexts/MarketContext";
 import { AddMarketModal } from "@/components/dashboard/AddMarketModal";
 import { MarketDetailsModal } from "@/components/dashboard/MarketDetailsModal";
+import { DateDetailsModal } from "@/components/dashboard/DateDetailsModal";
 import { cn } from "@/lib/utils";
 import { format, parseISO, isSameDay } from "date-fns";
 import { CalendarDays, Plus } from "lucide-react";
@@ -14,6 +15,7 @@ export const MarketCalendar = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isDateDetailsModalOpen, setIsDateDetailsModalOpen] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<any>(null);
   
   const upcomingMarkets = getUpcomingMarkets();
@@ -29,7 +31,7 @@ export const MarketCalendar = () => {
   const handleDateSelect = (date: Date | undefined) => {
     setSelectedDate(date);
     if (date) {
-      setIsAddModalOpen(true);
+      setIsDateDetailsModalOpen(true);
     }
   };
 
@@ -54,7 +56,7 @@ export const MarketCalendar = () => {
           Market Calendar
         </CardTitle>
         <CardDescription>
-          View your upcoming markets and click any date to add a new market
+          View your upcoming markets and click any date to see details or add new markets
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -140,7 +142,7 @@ export const MarketCalendar = () => {
                 <Plus className="h-3 w-3" />
                 <span className="font-medium">Tip:</span>
               </div>
-              Click any date on the calendar to add a new market for that day.
+              Click any date on the calendar to see scheduled markets or add a new one.
             </div>
           </div>
         </div>
@@ -157,6 +159,21 @@ export const MarketCalendar = () => {
           open={isDetailsModalOpen}
           onOpenChange={setIsDetailsModalOpen}
           onUpdateChecklist={updateMarketChecklist}
+        />
+
+        <DateDetailsModal
+          open={isDateDetailsModalOpen}
+          onOpenChange={setIsDateDetailsModalOpen}
+          selectedDate={selectedDate || null}
+          markets={upcomingMarkets}
+          onAddMarket={() => {
+            setIsDateDetailsModalOpen(false);
+            setIsAddModalOpen(true);
+          }}
+          onMarketClick={(market) => {
+            setIsDateDetailsModalOpen(false);
+            handleMarketClick(market);
+          }}
         />
       </CardContent>
     </Card>
