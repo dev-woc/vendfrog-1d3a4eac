@@ -15,16 +15,11 @@ const Index = () => {
             expense tracking, and document organization.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-12 sm:mb-16 px-4">
-            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-primary/80 min-h-[48px] text-base">
-              <Link to="/dashboard">
-                View Dashboard
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg" className="min-h-[48px] text-base">
+          <div className="flex justify-center mb-12 sm:mb-16 px-4">
+            <Button asChild size="lg" className="bg-gradient-to-r from-primary to-primary/80 min-h-[48px] text-base px-8">
               <Link to="/auth">
-                Login / Sign Up
+                Get Started
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
           </div>
