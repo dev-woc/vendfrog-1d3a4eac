@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit, Archive, TrendingDown } from "lucide-react";
+import { MapPin, Clock, CheckSquare, DollarSign, TrendingUp, Calendar, Plus, Edit, Archive, TrendingDown, ChevronDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MarketDetailsModal } from "./MarketDetailsModal";
 import { AddMarketModal } from "./AddMarketModal";
 import { CloseMarketModal } from "./CloseMarketModal";
@@ -213,6 +214,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const [editingMarket, setEditingMarket] = useState<Market | null>(null);
   const [showCloseModal, setShowCloseModal] = useState(false);
   const [marketToClose, setMarketToClose] = useState<Market | null>(null);
+  const [activeFilter, setActiveFilter] = useState("all-upcoming");
 
   const upcomingMarkets = getUpcomingMarkets();
   const pastMarkets = getPastMarkets();
@@ -285,128 +287,93 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const upcomingStatusMarkets = upcomingMarkets.filter(market => getMarketDisplayStatus(market) === 'upcoming');
   const completedMarkets = pastMarkets;
 
+  const filterOptions = [
+    { value: "all-upcoming", label: `All Upcoming (${upcomingMarkets.length})`, markets: upcomingMarkets },
+    { value: "pending", label: `Pending (${pendingMarkets.length})`, markets: pendingMarkets },
+    { value: "confirmed", label: `Confirmed (${confirmedMarkets.length})`, markets: confirmedMarkets },
+    { value: "upcoming", label: `Upcoming (${upcomingStatusMarkets.length})`, markets: upcomingStatusMarkets },
+    { value: "completed", label: `Completed (${completedMarkets.length})`, markets: completedMarkets }
+  ];
+
+  const currentFilterData = filterOptions.find(option => option.value === activeFilter);
+  const currentMarkets = currentFilterData?.markets || [];
+
   if (showAll) {
     return (
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <CardTitle className="flex items-center">
               <Calendar className="h-5 w-5 mr-2" />
               All Markets
             </CardTitle>
-            <Button onClick={() => setShowAddModal(true)} size="sm">
+            <Button onClick={() => setShowAddModal(true)} size="sm" className="w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Market
             </Button>
           </div>
         </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="all-upcoming" className="space-y-6">
-            <div className="mb-6">
-              <TabsList className="grid w-full grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1">
-                <TabsTrigger value="all-upcoming" className="text-xs sm:text-sm">All ({upcomingMarkets.length})</TabsTrigger>
-                <TabsTrigger value="pending" className="text-xs sm:text-sm">Pending ({pendingMarkets.length})</TabsTrigger>
-                <TabsTrigger value="confirmed" className="text-xs sm:text-sm">Confirmed ({confirmedMarkets.length})</TabsTrigger>
-                <TabsTrigger value="upcoming" className="text-xs sm:text-sm">Upcoming ({upcomingStatusMarkets.length})</TabsTrigger>
-                <TabsTrigger value="completed" className="text-xs sm:text-sm col-span-2 sm:col-span-1">Completed ({completedMarkets.length})</TabsTrigger>
+        <CardContent className="space-y-6">
+          {/* Mobile/Tablet Filter Dropdown */}
+          <div className="block lg:hidden">
+            <Select value={activeFilter} onValueChange={setActiveFilter}>
+              <SelectTrigger className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {filterOptions.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Desktop Tabs */}
+          <div className="hidden lg:block">
+            <Tabs value={activeFilter} onValueChange={setActiveFilter} className="space-y-6">
+              <TabsList className="grid w-full grid-cols-5">
+                {filterOptions.map((option) => (
+                  <TabsTrigger key={option.value} value={option.value} className="text-sm">
+                    {option.label}
+                  </TabsTrigger>
+                ))}
               </TabsList>
-            </div>
-            
-            <TabsContent value="all-upcoming">
-              <div className="space-y-4">
-                {upcomingMarkets.map((market) => (
-                  <MarketCard 
-                    key={market.id} 
-                    market={market} 
-                    onViewDetails={handleViewDetails} 
-                    onEditMarket={handleEditMarket}
-                    onCloseMarket={handleCloseMarket}
-                  />
-                ))}
-                {upcomingMarkets.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No upcoming markets.</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Add your first market to get started.
-                    </p>
-                  </div>
+            </Tabs>
+          </div>
+
+          {/* Market Content */}
+          <div className="space-y-4">
+            {currentMarkets.map((market) => (
+              activeFilter === "completed" ? (
+                <PastMarketCard key={market.id} market={market} />
+              ) : (
+                <MarketCard 
+                  key={market.id} 
+                  market={market} 
+                  onViewDetails={handleViewDetails} 
+                  onEditMarket={handleEditMarket}
+                  onCloseMarket={handleCloseMarket}
+                />
+              )
+            ))}
+            {currentMarkets.length === 0 && (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">
+                  {activeFilter === "completed" ? "No completed markets yet." : `No ${activeFilter.replace('-', ' ')} markets.`}
+                </p>
+                {(activeFilter === "all-upcoming" || activeFilter === "completed") && (
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {activeFilter === "completed" 
+                      ? "Markets will appear here once you close them out with actual revenue data."
+                      : "Add your first market to get started."
+                    }
+                  </p>
                 )}
               </div>
-            </TabsContent>
-            
-            <TabsContent value="pending">
-              <div className="space-y-4">
-                {pendingMarkets.map((market) => (
-                  <MarketCard 
-                    key={market.id} 
-                    market={market} 
-                    onViewDetails={handleViewDetails} 
-                    onEditMarket={handleEditMarket}
-                    onCloseMarket={handleCloseMarket}
-                  />
-                ))}
-                {pendingMarkets.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No pending markets.</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="confirmed">
-              <div className="space-y-4">
-                {confirmedMarkets.map((market) => (
-                  <MarketCard 
-                    key={market.id} 
-                    market={market} 
-                    onViewDetails={handleViewDetails} 
-                    onEditMarket={handleEditMarket}
-                    onCloseMarket={handleCloseMarket}
-                  />
-                ))}
-                {confirmedMarkets.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No confirmed markets.</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="upcoming">
-              <div className="space-y-4">
-                {upcomingStatusMarkets.map((market) => (
-                  <MarketCard 
-                    key={market.id} 
-                    market={market} 
-                    onViewDetails={handleViewDetails} 
-                    onEditMarket={handleEditMarket}
-                    onCloseMarket={handleCloseMarket}
-                  />
-                ))}
-                {upcomingStatusMarkets.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No upcoming status markets.</p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="completed">
-              <div className="space-y-4">
-                {completedMarkets.map((market) => (
-                  <PastMarketCard key={market.id} market={market} />
-                ))}
-                {completedMarkets.length === 0 && (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">No completed markets yet.</p>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Markets will appear here once you close them out with actual revenue data.
-                    </p>
-                  </div>
-                )}
-              </div>
-            </TabsContent>
-          </Tabs>
+            )}
+          </div>
         </CardContent>
 
         <MarketDetailsModal
