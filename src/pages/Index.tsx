@@ -22,6 +22,11 @@ const Index = () => {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </Button>
+            <Button asChild variant="outline" size="lg" className="min-h-[48px] text-base">
+              <Link to="/auth">
+                Login / Sign Up
+              </Link>
+            </Button>
           </div>
           
           <div className="grid gap-6 sm:gap-8 md:grid-cols-3 mt-12 sm:mt-16">
