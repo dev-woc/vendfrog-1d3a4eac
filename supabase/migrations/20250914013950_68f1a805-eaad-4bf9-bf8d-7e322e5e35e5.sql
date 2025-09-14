@@ -1,0 +1,2 @@
+-- Create edge function to send emails for chat messages
+-- This will handle sending chat messages to bluecowgency@gmail.com

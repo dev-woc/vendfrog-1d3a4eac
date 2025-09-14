@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
 import { LocationTicker } from "@/components/ui/LocationTicker";
+import { AlertsDropdown } from "@/components/dashboard/AlertsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardHeaderProps {
@@ -106,9 +107,7 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
             <LocationTicker />
           </div>
           
-          <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10">
-            <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
-          </Button>
+          <AlertsDropdown />
           
           <Button
             variant="ghost"

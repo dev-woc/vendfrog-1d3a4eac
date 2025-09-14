@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
@@ -20,6 +21,7 @@ const Auth = () => {
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Signup form state
   const [signupEmail, setSignupEmail] = useState("");
@@ -29,6 +31,17 @@ const Auth = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
+    // Load remembered credentials
+    const savedEmail = localStorage.getItem('vendfrog_email');
+    const savedPassword = localStorage.getItem('vendfrog_password');
+    if (savedEmail) {
+      setLoginEmail(savedEmail);
+      setRememberMe(true);
+    }
+    if (savedPassword) {
+      setLoginPassword(savedPassword);
+    }
+
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
@@ -72,6 +85,15 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
+        // Save credentials if remember me is checked
+        if (rememberMe) {
+          localStorage.setItem('vendfrog_email', loginEmail);
+          localStorage.setItem('vendfrog_password', loginPassword);
+        } else {
+          localStorage.removeItem('vendfrog_email');
+          localStorage.removeItem('vendfrog_password');
+        }
+        
         toast({
           title: "Success",
           description: "Successfully logged in!",
@@ -217,6 +239,18 @@ const Auth = () => {
                     required
                   />
                 </div>
+
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={setRememberMe}
+                  />
+                  <Label htmlFor="remember" className="text-sm">
+                    Remember email and password
+                  </Label>
+                </div>
+
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? "Logging in..." : "Login"}
                 </Button>

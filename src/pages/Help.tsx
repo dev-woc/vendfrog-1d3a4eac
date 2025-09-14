@@ -147,7 +147,7 @@ const Help = () => {
                     <div className="flex items-center gap-2">
                       <CreditCard className="h-4 w-4 text-primary" />
                       <span className="font-medium">Shopify Integration</span>
-                      <Badge variant="secondary">Q2 2024</Badge>
+                      <Badge variant="secondary">Q1 2026</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Sync your online store inventory with market setups automatically.
@@ -158,7 +158,7 @@ const Help = () => {
                     <div className="flex items-center gap-2">
                       <BarChart3 className="h-4 w-4 text-primary" />
                       <span className="font-medium">Square Real-time Tracking</span>
-                      <Badge variant="secondary">Q3 2024</Badge>
+                      <Badge variant="secondary">Q1 2026</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Live sales data and payment processing integration.
@@ -169,7 +169,7 @@ const Help = () => {
                     <div className="flex items-center gap-2">
                       <Smartphone className="h-4 w-4 text-primary" />
                       <span className="font-medium">Mobile App</span>
-                      <Badge variant="secondary">Q4 2024</Badge>
+                      <Badge variant="secondary">Q2 2026</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Manage your markets on the go with our native mobile app.
@@ -180,7 +180,7 @@ const Help = () => {
                     <div className="flex items-center gap-2">
                       <MessageCircle className="h-4 w-4 text-primary" />
                       <span className="font-medium">AI Assistant</span>
-                      <Badge variant="secondary">2025</Badge>
+                      <Badge variant="secondary">Q3 2026</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
                       Smart recommendations for market optimization and planning.
