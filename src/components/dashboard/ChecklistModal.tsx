@@ -108,14 +108,21 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
                 <Checkbox 
                   checked={item.completed}
                   onCheckedChange={() => handleChecklistUpdate(item.id)}
+                  className="transition-all duration-200"
                 />
                 <label 
-                  className={`text-sm cursor-pointer flex-1 transition-all duration-200 ${
+                  className={`text-sm cursor-pointer flex-1 transition-all duration-300 ease-in-out relative ${
                     item.completed 
-                      ? 'line-through text-muted-foreground opacity-60' 
+                      ? 'text-muted-foreground opacity-60' 
                       : 'text-foreground'
                   }`}
                   onClick={() => handleChecklistUpdate(item.id)}
+                  style={{
+                    textDecoration: item.completed ? 'line-through' : 'none',
+                    textDecorationThickness: '2px',
+                    textDecorationColor: 'hsl(var(--primary))',
+                    transition: 'all 0.3s ease-in-out'
+                  }}
                 >
                   {item.completed ? '✓ ' : ''}{item.label}
                 </label>
