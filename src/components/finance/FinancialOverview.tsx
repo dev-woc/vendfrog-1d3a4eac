@@ -52,10 +52,17 @@ export const FinancialOverview = () => {
     }
   ];
 
+  const cardVariants = [
+    "bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20",
+    "bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20", 
+    "bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20",
+    "bg-gradient-to-br from-muted/10 to-muted/5 border-muted/20"
+  ];
+
   return (
     <div className="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
       {cards.map((card, index) => (
-        <Card key={index}>
+        <Card key={index} className={cardVariants[index]}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
             <CardTitle className="text-xs sm:text-sm font-medium leading-tight">{card.title}</CardTitle>
             <card.icon className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
