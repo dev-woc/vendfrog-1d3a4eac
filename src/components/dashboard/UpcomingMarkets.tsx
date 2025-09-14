@@ -280,8 +280,10 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
                 variant="outline" 
                 size="sm" 
                 onClick={() => setIsAddModalOpen(true)}
+                className="min-h-[36px] sm:min-h-[44px] px-3 sm:px-4 text-xs sm:text-sm"
               >
-                Add New Market
+                <span className="hidden sm:inline">Add New Market</span>
+                <span className="sm:hidden">Add Market</span>
               </Button>
               <Link to="/markets">
                 <Button variant="outline" size="sm">View All</Button>
@@ -387,8 +389,12 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
               <TabsTrigger value="upcoming">This Week</TabsTrigger>
               <TabsTrigger value="completed">Completed</TabsTrigger>
             </TabsList>
-            <Button onClick={() => setIsAddModalOpen(true)}>
-              Add New Market
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="min-h-[44px] px-4 text-sm"
+            >
+              <span className="hidden sm:inline">Add New Market</span>
+              <span className="sm:hidden">Add Market</span>
             </Button>
           </div>
         </Tabs>
@@ -420,8 +426,12 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
                 ? "You haven't completed any markets yet." 
                 : "No markets match the current filter."}
             </p>
-            <Button onClick={() => setIsAddModalOpen(true)}>
-              Add Your First Market
+            <Button 
+              onClick={() => setIsAddModalOpen(true)}
+              className="min-h-[44px] px-4 text-sm"
+            >
+              <span className="hidden sm:inline">Add Your First Market</span>
+              <span className="sm:hidden">Add Market</span>
             </Button>
           </div>
         )}
