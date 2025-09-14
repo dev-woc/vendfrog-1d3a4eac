@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -20,17 +20,34 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
   const { toast } = useToast();
   const [newItemText, setNewItemText] = useState("");
   const [isAddingItem, setIsAddingItem] = useState(false);
+  const [localMarket, setLocalMarket] = useState<Market | null>(null);
   
-  if (!market) return null;
+  // Update local market when prop changes
+  useEffect(() => {
+    if (market) {
+      setLocalMarket({ ...market });
+    }
+  }, [market]);
 
-  const completedTasks = market.checklist.filter(item => item.completed).length;
-  const totalTasks = market.checklist.length;
+  const completedTasks = localMarket?.checklist.filter(item => item.completed).length || 0;
+  const totalTasks = localMarket?.checklist.length || 0;
+  
   
   const handleChecklistUpdate = (checklistItemId: string) => {
+    // Update local state immediately for instant UI feedback
+    setLocalMarket(prev => {
+      if (!prev) return prev;
+      const updatedChecklist = prev.checklist.map(item => 
+        item.id === checklistItemId ? { ...item, completed: !item.completed } : item
+      );
+      return { ...prev, checklist: updatedChecklist };
+    });
+
+    // Then update the context
     onUpdateChecklist(market.id, checklistItemId);
     
     // Find the item to determine if it's being checked or unchecked
-    const item = market.checklist.find(item => item.id === checklistItemId);
+    const item = localMarket.checklist.find(item => item.id === checklistItemId);
     const isCompleting = !item?.completed;
     
     toast({
@@ -49,6 +66,13 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
         completed: false
       };
       
+      // Update local state immediately
+      setLocalMarket(prev => {
+        if (!prev) return prev;
+        return { ...prev, checklist: [...prev.checklist, newItem] };
+      });
+
+      // Then update the context
       onAddChecklistItem(market.id, newItem);
       setNewItemText("");
       setIsAddingItem(false);
@@ -76,7 +100,7 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
           <div className="flex items-center justify-between">
             <DialogTitle className="flex items-center">
               <CheckSquare className="h-5 w-5 mr-2" />
-              {market.name} - Checklist
+              {localMarket.name} - Checklist
             </DialogTitle>
             <div className="text-sm text-muted-foreground">
               {completedTasks}/{totalTasks} ({Math.round((completedTasks / totalTasks) * 100)}%)
@@ -101,7 +125,7 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
 
           {/* Checklist Items */}
           <div className="space-y-3">
-            {market.checklist.map((item) => (
+            {localMarket.checklist.map((item) => (
               <div key={item.id} className={`flex items-center space-x-3 p-3 border rounded-lg hover:bg-muted/50 transition-all duration-200 ${
                 item.completed ? 'bg-muted/30 border-primary/20' : ''
               }`}>
@@ -170,7 +194,7 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
             )}
           </div>
           
-          {market.checklist.length === 0 && !isAddingItem && (
+          {localMarket.checklist.length === 0 && !isAddingItem && (
             <div className="text-center py-8 text-muted-foreground">
               <CheckSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>No checklist items for this market.</p>
@@ -190,7 +214,7 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
           <Button 
             variant="outline" 
             onClick={() => {
-              onEditMarket?.(market);
+              onEditMarket?.(localMarket);
               onOpenChange(false);
             }}
           >
