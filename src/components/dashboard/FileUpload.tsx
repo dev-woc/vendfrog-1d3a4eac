@@ -151,7 +151,7 @@ export function FileUpload() {
             className="hidden"
           />
           <Upload className="h-8 w-8 sm:h-12 sm:w-12 mx-auto text-muted-foreground mb-2" />
-          <p className="text-sm font-medium">Upload & Organize Your Business Files</p>
+          <p className="text-sm font-medium">Upload New Document/File</p>
           <p className="text-xs text-muted-foreground mt-1 px-2 leading-relaxed">
             Save and upload logos for organizers, insurance documents, permits, 
             certifications, and contracts all in one place for easy access when 

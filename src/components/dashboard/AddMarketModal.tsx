@@ -479,6 +479,21 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
               Cancel
             </Button>
+            {editingMarket && (
+              <Button 
+                type="button" 
+                variant="destructive" 
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this market?')) {
+                    // Call a delete function here - you'll need to add this to the context
+                    onOpenChange(false);
+                  }
+                }}
+                className="flex-1"
+              >
+                Delete Market
+              </Button>
+            )}
             <Button type="submit" className="flex-1">
               {editingMarket ? "Update Market" : "Add Market"}
             </Button>
