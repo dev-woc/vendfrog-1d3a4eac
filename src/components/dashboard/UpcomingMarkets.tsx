@@ -201,7 +201,7 @@ function PastMarketCard({ market }: { market: Market }) {
 }
 
 export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
-  const { getUpcomingMarkets, getPastMarkets, updateMarketChecklist, updateMarket, closeMarket } = useMarkets();
+  const { getUpcomingMarkets, getPastMarkets, updateMarketChecklist, updateMarket, closeMarket, addMarket } = useMarkets();
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [checklistMarket, setChecklistMarket] = useState<Market | null>(null);
   const [editingMarket, setEditingMarket] = useState<Market | null>(null);
@@ -465,7 +465,7 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
         onAddMarket={(market) => {
-          console.log('Adding market:', market);
+          addMarket(market);
           setIsAddModalOpen(false);
         }}
       />

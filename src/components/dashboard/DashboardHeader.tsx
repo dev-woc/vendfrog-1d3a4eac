@@ -153,7 +153,10 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                   <span>Help & Support</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => supabase.auth.signOut()}>
+              <DropdownMenuItem onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = '/auth';
+              }}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
