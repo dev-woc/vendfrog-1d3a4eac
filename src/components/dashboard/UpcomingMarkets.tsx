@@ -353,6 +353,15 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
           onOpenChange={setIsCloseModalOpen}
           onCloseMarket={handleCloseComplete}
         />
+
+        <AddMarketModal
+          open={isAddModalOpen}
+          onOpenChange={setIsAddModalOpen}
+          onAddMarket={(market) => {
+            addMarket(market);
+            setIsAddModalOpen(false);
+          }}
+        />
       </Card>
     );
   }
