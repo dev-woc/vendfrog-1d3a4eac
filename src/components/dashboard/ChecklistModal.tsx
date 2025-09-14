@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { CheckSquare, Edit } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { CheckSquare, Edit, Plus, X } from "lucide-react";
 import { Market } from "@/types/market";
 import { useToast } from "@/hooks/use-toast";
 
@@ -11,10 +13,13 @@ interface ChecklistModalProps {
   onOpenChange: (open: boolean) => void;
   onUpdateChecklist: (marketId: string, checklistItemId: string) => void;
   onEditMarket?: (market: Market) => void;
+  onAddChecklistItem?: (marketId: string, newItem: { id: string; label: string; completed: boolean }) => void;
 }
 
-export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, onEditMarket }: ChecklistModalProps) {
+export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, onEditMarket, onAddChecklistItem }: ChecklistModalProps) {
   const { toast } = useToast();
+  const [newItemText, setNewItemText] = useState("");
+  const [isAddingItem, setIsAddingItem] = useState(false);
   
   if (!market) return null;
 
@@ -34,6 +39,34 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
         ? `"${item?.label}" has been marked as complete.`
         : `"${item?.label}" has been marked as incomplete.`,
     });
+  };
+
+  const handleAddItem = () => {
+    if (newItemText.trim() && onAddChecklistItem) {
+      const newItem = {
+        id: Date.now().toString(),
+        label: newItemText.trim(),
+        completed: false
+      };
+      
+      onAddChecklistItem(market.id, newItem);
+      setNewItemText("");
+      setIsAddingItem(false);
+      
+      toast({
+        title: "Item added!",
+        description: `"${newItem.label}" has been added to the checklist.`,
+      });
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAddItem();
+    } else if (e.key === 'Escape') {
+      setIsAddingItem(false);
+      setNewItemText("");
+    }
   };
 
   return (
@@ -88,12 +121,60 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
                 </label>
               </div>
             ))}
+            
+            {/* Add New Item Section */}
+            {isAddingItem ? (
+              <div className="flex items-center space-x-2 p-3 border rounded-lg bg-muted/20">
+                <Input
+                  value={newItemText}
+                  onChange={(e) => setNewItemText(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder="Enter new checklist item..."
+                  className="flex-1"
+                  autoFocus
+                />
+                <Button 
+                  size="sm" 
+                  onClick={handleAddItem}
+                  disabled={!newItemText.trim()}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => {
+                    setIsAddingItem(false);
+                    setNewItemText("");
+                  }}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => setIsAddingItem(true)}
+                className="w-full"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add New Item
+              </Button>
+            )}
           </div>
           
-          {market.checklist.length === 0 && (
+          {market.checklist.length === 0 && !isAddingItem && (
             <div className="text-center py-8 text-muted-foreground">
               <CheckSquare className="h-12 w-12 mx-auto mb-2 opacity-50" />
               <p>No checklist items for this market.</p>
+              <Button 
+                variant="outline" 
+                onClick={() => setIsAddingItem(true)}
+                className="mt-3"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Item
+              </Button>
             </div>
           )}
         </div>

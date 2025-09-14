@@ -146,6 +146,7 @@ interface MarketContextType {
   markets: Market[];
   setMarkets: React.Dispatch<React.SetStateAction<Market[]>>;
   updateMarketChecklist: (marketId: string, checklistItemId: string) => void;
+  addChecklistItem: (marketId: string, newItem: { id: string; label: string; completed: boolean }) => void;
   addMarket: (market: Market) => void;
   updateMarket: (market: Market) => void;
   closeMarket: (marketId: string, actualRevenue: number) => void;
@@ -196,6 +197,14 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     ));
   };
 
+  const addChecklistItem = (marketId: string, newItem: { id: string; label: string; completed: boolean }) => {
+    setMarkets(prev => prev.map(market => 
+      market.id === marketId 
+        ? { ...market, checklist: [...market.checklist, newItem] }
+        : market
+    ));
+  };
+
   const addMarket = (market: Market) => {
     setMarkets(prev => [market, ...prev]);
   };
@@ -233,6 +242,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       markets,
       setMarkets,
       updateMarketChecklist,
+      addChecklistItem,
       addMarket,
       updateMarket,
       closeMarket,
