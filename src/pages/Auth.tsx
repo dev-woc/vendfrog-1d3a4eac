@@ -244,7 +244,7 @@ const Auth = () => {
                   <Checkbox 
                     id="remember"
                     checked={rememberMe}
-                    onCheckedChange={setRememberMe}
+                    onCheckedChange={(checked) => setRememberMe(checked === true)}
                   />
                   <Label htmlFor="remember" className="text-sm">
                     Remember email and password
