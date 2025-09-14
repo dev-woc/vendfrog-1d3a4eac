@@ -26,11 +26,16 @@ export function ChecklistModal({ market, open, onOpenChange, onUpdateChecklist, 
   useEffect(() => {
     if (market) {
       setLocalMarket({ ...market });
+    } else {
+      setLocalMarket(null);
     }
   }, [market]);
 
-  const completedTasks = localMarket?.checklist.filter(item => item.completed).length || 0;
-  const totalTasks = localMarket?.checklist.length || 0;
+  // Early return if no market data
+  if (!market || !localMarket) return null;
+
+  const completedTasks = localMarket.checklist.filter(item => item.completed).length;
+  const totalTasks = localMarket.checklist.length;
   
   
   const handleChecklistUpdate = (checklistItemId: string) => {
