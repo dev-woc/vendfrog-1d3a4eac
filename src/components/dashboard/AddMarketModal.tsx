@@ -153,8 +153,9 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submitted with data:', formData);
     
     const marketData = {
       ...formData,
@@ -165,24 +166,43 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
     };
 
-    if (editingMarket) {
-      // Update existing market
-      const updatedMarket = {
-        ...editingMarket,
-        ...marketData,
-      };
-      onUpdateMarket?.(updatedMarket);
-    } else {
-      // Add new market
-      const newMarket = {
-        id: Date.now().toString(),
-        ...marketData,
-      };
-      onAddMarket?.(newMarket);
-    }
+    console.log('Processed market data:', marketData);
 
-    setHasUnsavedChanges(false);
-    onOpenChange(false);
+    try {
+      if (editingMarket) {
+        // Update existing market
+        console.log('Updating market:', editingMarket.id);
+        const updatedMarket = {
+          ...editingMarket,
+          ...marketData,
+        };
+        await onUpdateMarket?.(updatedMarket);
+      } else {
+        // Add new market
+        console.log('Adding new market');
+        const newMarket = {
+          id: Date.now().toString(),
+          ...marketData,
+        };
+        console.log('New market object:', newMarket);
+        await onAddMarket?.(newMarket);
+      }
+
+      setHasUnsavedChanges(false);
+      onOpenChange(false);
+      
+      toast({
+        title: editingMarket ? "Market Updated" : "Market Added",
+        description: editingMarket ? "Market details have been updated successfully." : "New market has been added successfully.",
+      });
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save market. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

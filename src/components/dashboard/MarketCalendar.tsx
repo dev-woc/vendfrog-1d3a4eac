@@ -41,12 +41,18 @@ export const MarketCalendar = () => {
     setIsDetailsModalOpen(true);
   };
 
-  const handleAddMarket = (market: any) => {
-    // Set the date to the selected date if one was selected
-    if (selectedDate) {
-      market.date = format(selectedDate, 'yyyy-MM-dd');
+  const handleAddMarket = async (market: any) => {
+    try {
+      console.log('Adding market:', market);
+      // Set the date to the selected date if one was selected
+      if (selectedDate) {
+        market.date = format(selectedDate, 'yyyy-MM-dd');
+      }
+      await addMarket(market);
+      console.log('Market added successfully');
+    } catch (error) {
+      console.error('Error adding market:', error);
     }
-    addMarket(market);
   };
 
   return (
