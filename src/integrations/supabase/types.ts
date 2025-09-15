@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      markets: {
+        Row: {
+          actual_revenue: number | null
+          checklist: Json | null
+          city: string
+          completed: boolean | null
+          completed_date: string | null
+          country: string | null
+          created_at: string
+          date: string
+          description: string | null
+          estimated_profit: number
+          fee: number
+          id: string
+          load_in_time: string
+          market_end_time: string
+          market_start_time: string
+          name: string
+          organizer_contact: string | null
+          requirements: string[] | null
+          state: string
+          status: string
+          street: string
+          updated_at: string
+          user_id: string
+          zip_code: string
+        }
+        Insert: {
+          actual_revenue?: number | null
+          checklist?: Json | null
+          city: string
+          completed?: boolean | null
+          completed_date?: string | null
+          country?: string | null
+          created_at?: string
+          date: string
+          description?: string | null
+          estimated_profit: number
+          fee: number
+          id?: string
+          load_in_time: string
+          market_end_time: string
+          market_start_time: string
+          name: string
+          organizer_contact?: string | null
+          requirements?: string[] | null
+          state: string
+          status: string
+          street: string
+          updated_at?: string
+          user_id: string
+          zip_code: string
+        }
+        Update: {
+          actual_revenue?: number | null
+          checklist?: Json | null
+          city?: string
+          completed?: boolean | null
+          completed_date?: string | null
+          country?: string | null
+          created_at?: string
+          date?: string
+          description?: string | null
+          estimated_profit?: number
+          fee?: number
+          id?: string
+          load_in_time?: string
+          market_end_time?: string
+          market_start_time?: string
+          name?: string
+          organizer_contact?: string | null
+          requirements?: string[] | null
+          state?: string
+          status?: string
+          street?: string
+          updated_at?: string
+          user_id?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null

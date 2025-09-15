@@ -145,88 +145,303 @@ const initialMarkets: Market[] = [
 interface MarketContextType {
   markets: Market[];
   setMarkets: React.Dispatch<React.SetStateAction<Market[]>>;
-  updateMarketChecklist: (marketId: string, checklistItemId: string) => void;
-  addChecklistItem: (marketId: string, newItem: { id: string; label: string; completed: boolean }) => void;
-  addMarket: (market: Market) => void;
-  updateMarket: (market: Market) => void;
-  closeMarket: (marketId: string, actualRevenue: number) => void;
+  updateMarketChecklist: (marketId: string, checklistItemId: string) => Promise<void>;
+  addChecklistItem: (marketId: string, newItem: { id: string; label: string; completed: boolean }) => Promise<void>;
+  addMarket: (market: Market) => Promise<void>;
+  updateMarket: (market: Market) => Promise<void>;
+  closeMarket: (marketId: string, actualRevenue: number) => Promise<void>;
   getUpcomingMarkets: () => Market[];
   getPastMarkets: () => Market[];
+  isLoading: boolean;
 }
 
 const MarketContext = createContext<MarketContextType | undefined>(undefined);
 
+// Helper function to convert database row to Market object
+const convertDbToMarket = (dbMarket: any): Market => ({
+  id: dbMarket.id,
+  name: dbMarket.name,
+  date: dbMarket.date,
+  loadInTime: dbMarket.load_in_time,
+  marketStartTime: dbMarket.market_start_time,
+  marketEndTime: dbMarket.market_end_time,
+  address: {
+    street: dbMarket.street,
+    city: dbMarket.city,
+    state: dbMarket.state,
+    zipCode: dbMarket.zip_code,
+    country: dbMarket.country || 'US'
+  },
+  fee: parseFloat(dbMarket.fee),
+  estimatedProfit: parseFloat(dbMarket.estimated_profit),
+  actualRevenue: dbMarket.actual_revenue ? parseFloat(dbMarket.actual_revenue) : undefined,
+  status: dbMarket.status,
+  description: dbMarket.description,
+  organizerContact: dbMarket.organizer_contact,
+  requirements: dbMarket.requirements || [],
+  checklist: dbMarket.checklist || [],
+  completed: dbMarket.completed,
+  completedDate: dbMarket.completed_date
+});
+
+// Helper function to convert Market object to database format
+const convertMarketToDb = (market: Market, userId: string) => ({
+  id: market.id,
+  user_id: userId,
+  name: market.name,
+  date: market.date,
+  load_in_time: market.loadInTime,
+  market_start_time: market.marketStartTime,
+  market_end_time: market.marketEndTime,
+  street: market.address.street,
+  city: market.address.city,
+  state: market.address.state,
+  zip_code: market.address.zipCode,
+  country: market.address.country || 'US',
+  fee: market.fee,
+  estimated_profit: market.estimatedProfit,
+  actual_revenue: market.actualRevenue,
+  status: market.status,
+  description: market.description,
+  organizer_contact: market.organizerContact,
+  requirements: market.requirements || [],
+  checklist: market.checklist || [],
+  completed: market.completed || false,
+  completed_date: market.completedDate
+});
+
 export function MarketProvider({ children }: { children: ReactNode }) {
   const [markets, setMarkets] = useState<Market[]>([]);
-  const [isNewUser, setIsNewUser] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check if user is new or returning
+  // Load user's markets from database
   useEffect(() => {
-    const checkUserStatus = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        // For demo purposes, we'll check if user has been here before using localStorage
-        // In a real app, you'd check their profile or market history in the database
-        const hasVisitedBefore = localStorage.getItem(`user_${user.id}_visited`);
-        if (!hasVisitedBefore) {
-          setIsNewUser(true);
-          setMarkets([]); // No sample data for new users
-        } else {
-          setIsNewUser(false);
-          setMarkets(initialMarkets); // Show sample data for returning users
+    const loadMarkets = async (user: any) => {
+      if (!user) {
+        setMarkets([]);
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        console.log('Loading markets for user:', user.id);
+        const { data: dbMarkets, error } = await supabase
+          .from('markets')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('date', { ascending: true });
+
+        if (error) {
+          console.error('Error loading markets:', error);
+          setIsLoading(false);
+          return;
         }
-        localStorage.setItem(`user_${user.id}_visited`, 'true');
+
+        if (dbMarkets && dbMarkets.length > 0) {
+          const convertedMarkets = dbMarkets.map(convertDbToMarket);
+          console.log('Loaded markets from database:', convertedMarkets);
+          setMarkets(convertedMarkets);
+        } else {
+          // New user - add some sample data
+          console.log('New user detected, adding sample data');
+          await addSampleData(user.id);
+        }
+      } catch (error) {
+        console.error('Error in loadMarkets:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    checkUserStatus();
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        if (event === 'SIGNED_IN' && session?.user) {
+          setIsLoading(true);
+          await loadMarkets(session.user);
+        } else if (event === 'SIGNED_OUT') {
+          setMarkets([]);
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // Also check current user on mount
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      loadMarkets(user);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const updateMarketChecklist = (marketId: string, checklistItemId: string) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === marketId 
-        ? { 
-            ...market, 
-            checklist: market.checklist.map(item => 
-              item.id === checklistItemId 
-                ? { ...item, completed: !item.completed }
-                : item
-            )
-          }
-        : market
+  // Add sample data for new users
+  const addSampleData = async (userId: string) => {
+    try {
+      const sampleMarkets = initialMarkets.map(market => convertMarketToDb(market, userId));
+      const { error } = await supabase
+        .from('markets')
+        .insert(sampleMarkets);
+
+      if (error) {
+        console.error('Error adding sample data:', error);
+      } else {
+        console.log('Sample data added successfully');
+        // Reload markets after adding sample data
+        const { data: dbMarkets, error: loadError } = await supabase
+          .from('markets')
+          .select('*')
+          .eq('user_id', userId)
+          .order('date', { ascending: true });
+
+        if (!loadError && dbMarkets) {
+          const convertedMarkets = dbMarkets.map(convertDbToMarket);
+          setMarkets(convertedMarkets);
+        }
+      }
+    } catch (error) {
+      console.error('Error in addSampleData:', error);
+    }
+  };
+
+  const updateMarketChecklist = async (marketId: string, checklistItemId: string) => {
+    const market = markets.find(m => m.id === marketId);
+    if (!market) return;
+
+    const updatedChecklist = market.checklist.map(item => 
+      item.id === checklistItemId 
+        ? { ...item, completed: !item.completed }
+        : item
+    );
+
+    // Update in database
+    const { error } = await supabase
+      .from('markets')
+      .update({ checklist: updatedChecklist })
+      .eq('id', marketId);
+
+    if (error) {
+      console.error('Error updating checklist:', error);
+      return;
+    }
+
+    // Update local state
+    setMarkets(prev => prev.map(m => 
+      m.id === marketId 
+        ? { ...m, checklist: updatedChecklist }
+        : m
     ));
   };
 
-  const addChecklistItem = (marketId: string, newItem: { id: string; label: string; completed: boolean }) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === marketId 
-        ? { ...market, checklist: [...market.checklist, newItem] }
-        : market
+  const addChecklistItem = async (marketId: string, newItem: { id: string; label: string; completed: boolean }) => {
+    const market = markets.find(m => m.id === marketId);
+    if (!market) return;
+
+    const updatedChecklist = [...market.checklist, newItem];
+
+    // Update in database
+    const { error } = await supabase
+      .from('markets')
+      .update({ checklist: updatedChecklist })
+      .eq('id', marketId);
+
+    if (error) {
+      console.error('Error adding checklist item:', error);
+      return;
+    }
+
+    // Update local state
+    setMarkets(prev => prev.map(m => 
+      m.id === marketId 
+        ? { ...m, checklist: updatedChecklist }
+        : m
     ));
   };
 
-  const addMarket = (market: Market) => {
-    setMarkets(prev => [market, ...prev]);
+  const addMarket = async (market: Market) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('No user found when adding market');
+        return;
+      }
+
+      const dbMarket = convertMarketToDb(market, user.id);
+      const { error } = await supabase
+        .from('markets')
+        .insert([dbMarket]);
+
+      if (error) {
+        console.error('Error adding market:', error);
+        return;
+      }
+
+      console.log('Market added successfully:', market);
+      // Update local state
+      setMarkets(prev => [market, ...prev]);
+    } catch (error) {
+      console.error('Error in addMarket:', error);
+    }
   };
 
-  const updateMarket = (updatedMarket: Market) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === updatedMarket.id ? updatedMarket : market
-    ));
+  const updateMarket = async (updatedMarket: Market) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const dbMarket = convertMarketToDb(updatedMarket, user.id);
+      const { error } = await supabase
+        .from('markets')
+        .update(dbMarket)
+        .eq('id', updatedMarket.id);
+
+      if (error) {
+        console.error('Error updating market:', error);
+        return;
+      }
+
+      // Update local state
+      setMarkets(prev => prev.map(market => 
+        market.id === updatedMarket.id ? updatedMarket : market
+      ));
+    } catch (error) {
+      console.error('Error in updateMarket:', error);
+    }
   };
 
-  const closeMarket = (marketId: string, actualRevenue: number) => {
-    setMarkets(prev => prev.map(market => 
-      market.id === marketId 
-        ? { 
-            ...market, 
-            status: "completed" as const,
-            actualRevenue,
-            completed: true,
-            completedDate: new Date().toISOString().split('T')[0]
-          }
-        : market
-    ));
+  const closeMarket = async (marketId: string, actualRevenue: number) => {
+    try {
+      const completedDate = new Date().toISOString().split('T')[0];
+      const { error } = await supabase
+        .from('markets')
+        .update({ 
+          status: 'completed',
+          actual_revenue: actualRevenue,
+          completed: true,
+          completed_date: completedDate
+        })
+        .eq('id', marketId);
+
+      if (error) {
+        console.error('Error closing market:', error);
+        return;
+      }
+
+      // Update local state
+      setMarkets(prev => prev.map(market => 
+        market.id === marketId 
+          ? { 
+              ...market, 
+              status: "completed" as const,
+              actualRevenue,
+              completed: true,
+              completedDate
+            }
+          : market
+      ));
+    } catch (error) {
+      console.error('Error in closeMarket:', error);
+    }
   };
 
   const getUpcomingMarkets = () => {
@@ -247,7 +462,8 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       updateMarket,
       closeMarket,
       getUpcomingMarkets,
-      getPastMarkets
+      getPastMarkets,
+      isLoading
     }}>
       {children}
     </MarketContext.Provider>
