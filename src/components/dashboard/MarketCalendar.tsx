@@ -6,6 +6,7 @@ import { useMarkets } from "@/contexts/MarketContext";
 import { AddMarketModal } from "@/components/dashboard/AddMarketModal";
 import { MarketDetailsModal } from "@/components/dashboard/MarketDetailsModal";
 import { DateDetailsModal } from "@/components/dashboard/DateDetailsModal";
+import { CalendarSyncDropdown } from "@/components/dashboard/CalendarSyncDropdown";
 import { cn } from "@/lib/utils";
 import { format, parseISO, isSameDay } from "date-fns";
 import { CalendarDays, Plus } from "lucide-react";
@@ -51,13 +52,21 @@ export const MarketCalendar = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5" />
-          Market Calendar
-        </CardTitle>
-        <CardDescription>
-          View your upcoming markets and click any date to see details or add new markets
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarDays className="h-5 w-5" />
+              Market Calendar
+            </CardTitle>
+            <CardDescription>
+              View your upcoming markets and click any date to see details or add new markets
+            </CardDescription>
+          </div>
+          <CalendarSyncDropdown 
+            markets={upcomingMarkets}
+            selectedMarket={selectedMarket}
+          />
+        </div>
       </CardHeader>
       <CardContent>
         {/* Legend */}
@@ -111,15 +120,23 @@ export const MarketCalendar = () => {
               {upcomingMarkets.slice(0, 8).map(market => (
                 <div 
                   key={market.id} 
-                  className="p-2 rounded-lg border bg-muted/50 cursor-pointer hover:bg-muted transition-colors"
+                  className="p-2 rounded-lg border bg-muted/50 cursor-pointer hover:bg-muted transition-colors group"
                   onClick={() => handleMarketClick(market)}
                 >
-                  <div className="font-medium text-sm truncate">{market.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {format(parseISO(market.date), 'MMM d, yyyy')}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {market.address.city}, {market.address.state}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm truncate">{market.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {format(parseISO(market.date), 'MMM d, yyyy')}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {market.address.city}, {market.address.state}
+                      </div>
+                    </div>
+                    <CalendarSyncDropdown 
+                      markets={[market]}
+                      selectedMarket={market}
+                    />
                   </div>
                 </div>
               ))}
