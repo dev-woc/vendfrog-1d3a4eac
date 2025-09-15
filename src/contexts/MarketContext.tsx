@@ -367,18 +367,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       }
 
       const dbMarket = convertMarketToDb(market, user.id);
-      const { error } = await supabase
+      // Remove id to let database auto-generate UUID
+      const { id, ...dbMarketWithoutId } = dbMarket;
+      
+      const { data, error } = await supabase
         .from('markets')
-        .insert([dbMarket]);
+        .insert([dbMarketWithoutId])
+        .select()
+        .single();
 
       if (error) {
         console.error('Error adding market:', error);
         return;
       }
 
-      console.log('Market added successfully:', market);
-      // Update local state
-      setMarkets(prev => [market, ...prev]);
+      console.log('Market added successfully:', data);
+      // Convert the database result back to Market format and add to local state
+      const newMarket = convertDbToMarket(data);
+      setMarkets(prev => [newMarket, ...prev]);
     } catch (error) {
       console.error('Error in addMarket:', error);
     }

@@ -181,7 +181,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         // Add new market
         console.log('Adding new market');
         const newMarket = {
-          id: Date.now().toString(),
+          // Remove id - let database auto-generate UUID
           ...marketData,
         };
         console.log('New market object:', newMarket);
