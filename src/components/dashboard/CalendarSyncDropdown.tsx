@@ -37,14 +37,19 @@ export const CalendarSyncDropdown = ({
 
   const handleSync = (platform: 'apple' | 'google' | 'ics', bulkSync = false) => {
     try {
+      console.log('Starting sync for platform:', platform, 'bulkSync:', bulkSync);
+      
       if (bulkSync && markets.length > 0) {
+        console.log('Bulk syncing markets:', markets.length);
         bulkSyncMarkets(markets, platform);
         toast({
           title: "Bulk Sync Started",
           description: `Syncing ${markets.length} markets to ${platform === 'apple' ? 'Apple Calendar' : platform === 'google' ? 'Google Calendar' : 'ICS files'}.`,
         });
       } else if (selectedMarket) {
+        console.log('Syncing single market:', selectedMarket.name);
         const event = marketToCalendarEvent(selectedMarket);
+        console.log('Generated calendar event:', event);
         
         switch (platform) {
           case 'apple':
@@ -62,6 +67,8 @@ export const CalendarSyncDropdown = ({
           title: "Calendar Sync",
           description: `Market "${selectedMarket.name}" synced to ${platform === 'apple' ? 'Apple Calendar' : platform === 'google' ? 'Google Calendar' : 'calendar file'}.`,
         });
+      } else {
+        throw new Error('No market selected for sync');
       }
       
       const syncTime = new Date().toLocaleString();
@@ -70,9 +77,10 @@ export const CalendarSyncDropdown = ({
       onSyncComplete?.();
       
     } catch (error) {
+      console.error('Calendar sync error:', error);
       toast({
         title: "Sync Failed",
-        description: "Unable to sync to calendar. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to sync to calendar. Please try again.",
         variant: "destructive",
       });
     }

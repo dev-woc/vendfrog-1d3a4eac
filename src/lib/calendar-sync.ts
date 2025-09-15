@@ -10,29 +10,47 @@ export interface CalendarEvent {
 }
 
 export function marketToCalendarEvent(market: Market): CalendarEvent {
-  const marketDate = parseISO(market.date);
-  const startTime = market.loadInTime || market.marketStartTime;
-  const endTime = market.marketEndTime;
-  
-  // Combine date with times
-  const [startHour, startMinute] = startTime.split(':').map(Number);
-  const [endHour, endMinute] = endTime.split(':').map(Number);
-  
-  const startDateTime = new Date(marketDate);
-  startDateTime.setHours(startHour, startMinute, 0, 0);
-  
-  const endDateTime = new Date(marketDate);
-  endDateTime.setHours(endHour, endMinute, 0, 0);
-  
-  const location = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}`;
-  
-  return {
-    title: market.name,
-    startDate: startDateTime.toISOString(),
-    endDate: endDateTime.toISOString(),
-    location,
-    description: market.description || `Market at ${location}. Fee: $${market.fee}. Expected profit: $${market.estimatedProfit}.`
-  };
+  try {
+    const marketDate = parseISO(market.date);
+    const startTime = market.loadInTime || market.marketStartTime;
+    const endTime = market.marketEndTime;
+    
+    if (!startTime || !endTime) {
+      throw new Error(`Missing time information for market: ${market.name}`);
+    }
+    
+    // Combine date with times - handle different time formats
+    const parseTime = (timeStr: string) => {
+      // Handle formats like "09:00", "9:00 AM", "09:00:00"
+      const cleanTime = timeStr.replace(/\s*(AM|PM)\s*/i, '').split(':');
+      if (cleanTime.length < 2) {
+        throw new Error(`Invalid time format: ${timeStr}`);
+      }
+      return [parseInt(cleanTime[0]), parseInt(cleanTime[1])];
+    };
+    
+    const [startHour, startMinute] = parseTime(startTime);
+    const [endHour, endMinute] = parseTime(endTime);
+    
+    const startDateTime = new Date(marketDate);
+    startDateTime.setHours(startHour, startMinute, 0, 0);
+    
+    const endDateTime = new Date(marketDate);
+    endDateTime.setHours(endHour, endMinute, 0, 0);
+    
+    const location = `${market.address.street}, ${market.address.city}, ${market.address.state} ${market.address.zipCode}`;
+    
+    return {
+      title: market.name,
+      startDate: startDateTime.toISOString(),
+      endDate: endDateTime.toISOString(),
+      location,
+      description: market.description || `Market at ${location}. Fee: $${market.fee}. Expected profit: $${market.estimatedProfit}.`
+    };
+  } catch (error) {
+    console.error('Error converting market to calendar event:', error, market);
+    throw new Error(`Failed to process market data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
 }
 
 export function generateICSFile(event: CalendarEvent): string {
