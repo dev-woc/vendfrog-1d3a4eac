@@ -15,11 +15,13 @@ interface Alert {
 }
 
 export function AlertsDropdown() {
-  const { getUpcomingMarkets } = useMarkets();
+  const { getUpcomingMarkets, markets, isLoading } = useMarkets();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [dismissedAlerts, setDismissedAlerts] = useState<string[]>([]);
 
   useEffect(() => {
+    if (isLoading || !getUpcomingMarkets) return;
+    
     const upcomingMarkets = getUpcomingMarkets();
     const newAlerts: Alert[] = [];
     const dismissed = JSON.parse(localStorage.getItem('dismissedAlerts') || '[]');
@@ -66,7 +68,7 @@ export function AlertsDropdown() {
     });
 
     setAlerts(newAlerts);
-  }, [getUpcomingMarkets]);
+  }, [getUpcomingMarkets, markets, isLoading]);
 
   const dismissAlert = (alertId: string) => {
     const newDismissed = [...dismissedAlerts, alertId];
