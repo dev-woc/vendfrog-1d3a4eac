@@ -23,13 +23,19 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: profile } = await supabase
+          console.log('Fetching profile for user:', user.id);
+          const { data: profile, error } = await supabase
             .from('profiles')
-            .select('full_name')
+            .select('full_name, company_name, phone_number')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
           
-          setUserProfile(profile);
+          if (error) {
+            console.error('Error fetching profile:', error);
+          } else {
+            console.log('Profile fetched:', profile);
+            setUserProfile(profile);
+          }
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
