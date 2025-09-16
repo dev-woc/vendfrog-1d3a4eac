@@ -157,6 +157,27 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     e.preventDefault();
     console.log('Form submitted with data:', formData);
     
+    // Validate required fields
+    if (!formData.name.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Market name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (!formData.date) {
+      toast({
+        title: "Validation Error", 
+        description: "Market date is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    
     const marketData = {
       ...formData,
       fee: parseFloat(formData.fee) || 0,
@@ -189,12 +210,14 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       }
 
       setHasUnsavedChanges(false);
-      onOpenChange(false);
       
       toast({
         title: editingMarket ? "Market Updated" : "Market Added",
         description: editingMarket ? "Market details have been updated successfully." : "New market has been added successfully.",
       });
+      
+      // Only close modal after successful operation
+      onOpenChange(false);
     } catch (error) {
       console.error('Error in handleSubmit:', error);
       toast({
@@ -202,6 +225,8 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         description: "Failed to save market. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
