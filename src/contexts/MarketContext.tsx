@@ -2,145 +2,131 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Market } from '@/types/market';
 import { supabase } from '@/integrations/supabase/client';
 
-const initialMarkets: Market[] = [
-  {
-    id: "1",
-    name: "Downtown Farmers Market",
-    date: "2024-01-15",
-    loadInTime: "6:00 AM",
-    marketStartTime: "8:00 AM",
-    marketEndTime: "2:00 PM",
-    address: {
-      street: "123 Main Street Plaza",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97201",
-      country: "US"
+const getInitialMarkets = (): Market[] => {
+  const today = new Date();
+  const nextWeek = new Date(today);
+  nextWeek.setDate(today.getDate() + 7);
+  const nextMonth = new Date(today);
+  nextMonth.setDate(today.getDate() + 30);
+  const lastMonth = new Date(today);
+  lastMonth.setDate(today.getDate() - 30);
+  const twoMonthsAgo = new Date(today);
+  twoMonthsAgo.setDate(today.getDate() - 60);
+
+  return [
+    {
+      id: "sample-1",
+      name: "Downtown Farmers Market",
+      date: nextWeek.toISOString().split('T')[0],
+      loadInTime: "6:00 AM",
+      marketStartTime: "8:00 AM",
+      marketEndTime: "2:00 PM",
+      address: {
+        street: "123 Main Street Plaza",
+        city: "Portland",
+        state: "OR",
+        zipCode: "97201",
+        country: "US"
+      },
+      fee: 85,
+      estimatedProfit: 400,
+      status: "confirmed",
+      organizerContact: "sarah@downtownmarket.com",
+      requirements: ["Valid business license", "Liability insurance", "Setup by 7:30 AM"],
+      checklist: [
+        { id: "insurance", label: "Insurance Documents", completed: true },
+        { id: "permit", label: "Business Permit", completed: true },
+        { id: "inventory", label: "Inventory Prepared", completed: false },
+        { id: "setup", label: "Setup Plan Ready", completed: false },
+      ],
     },
-    fee: 85,
-    estimatedProfit: 400,
-    status: "confirmed",
-    organizerContact: "sarah@downtownmarket.com",
-    requirements: ["Valid business license", "Liability insurance", "Setup by 7:30 AM"],
-    checklist: [
-      { id: "insurance", label: "Insurance Documents", completed: true },
-      { id: "permit", label: "Business Permit", completed: true },
-      { id: "inventory", label: "Inventory Prepared", completed: false },
-      { id: "setup", label: "Setup Plan Ready", completed: false },
-    ],
-  },
-  {
-    id: "2",
-    name: "Weekend Artisan Fair",
-    date: "2024-01-20",
-    loadInTime: "8:00 AM",
-    marketStartTime: "10:00 AM",
-    marketEndTime: "5:00 PM",
-    address: {
-      street: "456 City Park Pavilion",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97202",
-      country: "US"
+    {
+      id: "sample-2",
+      name: "Weekend Artisan Fair",
+      date: nextMonth.toISOString().split('T')[0],
+      loadInTime: "8:00 AM",
+      marketStartTime: "10:00 AM",
+      marketEndTime: "5:00 PM",
+      address: {
+        street: "456 City Park Pavilion",
+        city: "Portland",
+        state: "OR",
+        zipCode: "97202",
+        country: "US"
+      },
+      fee: 120,
+      estimatedProfit: 650,
+      status: "pending",
+      organizerContact: "info@artisanfair.org",
+      requirements: ["Handmade items only", "Tent required", "Insurance certificate"],
+      checklist: [
+        { id: "insurance", label: "Insurance Documents", completed: true },
+        { id: "permit", label: "Business Permit", completed: false },
+        { id: "inventory", label: "Inventory Prepared", completed: false },
+        { id: "setup", label: "Setup Plan Ready", completed: false },
+      ],
     },
-    fee: 120,
-    estimatedProfit: 650,
-    status: "upcoming",
-    organizerContact: "info@artisanfair.org",
-    requirements: ["Handmade items only", "Tent required", "Insurance certificate"],
-    checklist: [
-      { id: "insurance", label: "Insurance Documents", completed: true },
-      { id: "permit", label: "Business Permit", completed: false },
-      { id: "inventory", label: "Inventory Prepared", completed: false },
-      { id: "setup", label: "Setup Plan Ready", completed: false },
-    ],
-  },
-  {
-    id: "3",
-    name: "Holiday Night Market",
-    date: "2024-01-25",
-    loadInTime: "4:00 PM",
-    marketStartTime: "6:00 PM",
-    marketEndTime: "10:00 PM",
-    address: {
-      street: "789 Harbor District Way",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97203",
-      country: "US"
+    // Past markets
+    {
+      id: "sample-past-1",
+      name: "Winter Holiday Market",
+      date: lastMonth.toISOString().split('T')[0],
+      loadInTime: "7:00 AM",
+      marketStartTime: "9:00 AM",
+      marketEndTime: "4:00 PM",
+      address: {
+        street: "456 Festival Square",
+        city: "Portland",
+        state: "OR",
+        zipCode: "97204",
+        country: "US"
+      },
+      fee: 100,
+      estimatedProfit: 500,
+      actualRevenue: 580,
+      status: "completed",
+      organizerContact: "events@festivalsquare.com",
+      requirements: ["Holiday-themed products", "Festive decorations"],
+      checklist: [
+        { id: "insurance", label: "Insurance Documents", completed: true },
+        { id: "permit", label: "Business Permit", completed: true },
+        { id: "inventory", label: "Inventory Prepared", completed: true },
+        { id: "setup", label: "Setup Plan Ready", completed: true },
+      ],
+      completed: true,
+      completedDate: lastMonth.toISOString().split('T')[0],
     },
-    fee: 150,
-    estimatedProfit: 800,
-    status: "pending",
-    organizerContact: "events@harbordistrict.com",
-    requirements: ["Holiday themed products", "Lighting setup", "Extended hours"],
-    checklist: [
-      { id: "insurance", label: "Insurance Documents", completed: false },
-      { id: "permit", label: "Business Permit", completed: false },
-      { id: "inventory", label: "Inventory Prepared", completed: false },
-      { id: "setup", label: "Setup Plan Ready", completed: false },
-    ],
-  },
-  // Past markets
-  {
-    id: "past-1",
-    name: "Winter Holiday Market",
-    date: "2023-12-15",
-    loadInTime: "7:00 AM",
-    marketStartTime: "9:00 AM",
-    marketEndTime: "4:00 PM",
-    address: {
-      street: "456 Festival Square",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97204",
-      country: "US"
-    },
-    fee: 100,
-    estimatedProfit: 500,
-    actualRevenue: 580,
-    status: "completed",
-    organizerContact: "events@festivalsquare.com",
-    requirements: ["Holiday-themed products", "Festive decorations"],
-    checklist: [
-      { id: "insurance", label: "Insurance Documents", completed: true },
-      { id: "permit", label: "Business Permit", completed: true },
-      { id: "inventory", label: "Inventory Prepared", completed: true },
-      { id: "setup", label: "Setup Plan Ready", completed: true },
-    ],
-    completed: true,
-    completedDate: "2023-12-15",
-  },
-  {
-    id: "past-2",
-    name: "Autumn Craft Fair",
-    date: "2023-10-28",
-    loadInTime: "6:30 AM",
-    marketStartTime: "8:00 AM",
-    marketEndTime: "3:00 PM",
-    address: {
-      street: "789 Community Center",
-      city: "Portland",
-      state: "OR",
-      zipCode: "97205",
-      country: "US"
-    },
-    fee: 75,
-    estimatedProfit: 350,
-    actualRevenue: 320,
-    status: "completed",
-    organizerContact: "info@communitycenter.org",
-    requirements: ["Handmade crafts only", "Setup by 7:30 AM"],
-    checklist: [
-      { id: "insurance", label: "Insurance Documents", completed: true },
-      { id: "permit", label: "Business Permit", completed: true },
-      { id: "inventory", label: "Inventory Prepared", completed: true },
-      { id: "setup", label: "Setup Plan Ready", completed: true },
-    ],
-    completed: true,
-    completedDate: "2023-10-28",
-  }
-];
+    {
+      id: "sample-past-2",
+      name: "Autumn Craft Fair",
+      date: twoMonthsAgo.toISOString().split('T')[0],
+      loadInTime: "6:30 AM",
+      marketStartTime: "8:00 AM",
+      marketEndTime: "3:00 PM",
+      address: {
+        street: "789 Community Center",
+        city: "Portland",
+        state: "OR",
+        zipCode: "97205",
+        country: "US"
+      },
+      fee: 75,
+      estimatedProfit: 350,
+      actualRevenue: 320,
+      status: "completed",
+      organizerContact: "info@communitycenter.org",
+      requirements: ["Handmade crafts only", "Setup by 7:30 AM"],
+      checklist: [
+        { id: "insurance", label: "Insurance Documents", completed: true },
+        { id: "permit", label: "Business Permit", completed: true },
+        { id: "inventory", label: "Inventory Prepared", completed: true },
+        { id: "setup", label: "Setup Plan Ready", completed: true },
+      ],
+      completed: true,
+      completedDate: twoMonthsAgo.toISOString().split('T')[0],
+    }
+  ];
+};
 
 interface MarketContextType {
   markets: Market[];
@@ -241,6 +227,12 @@ export function MarketProvider({ children }: { children: ReactNode }) {
           const convertedMarkets = dbMarkets.map(convertDbToMarket);
           console.log('Loaded markets from database:', convertedMarkets);
           setMarkets(convertedMarkets);
+          
+          // If user has only one market, add some sample data to showcase the functionality
+          if (dbMarkets.length <= 1) {
+            console.log('User has limited markets, adding sample data for demo');
+            await addSampleData(user.id);
+          }
         } else {
           // New user - add some sample data
           console.log('New user detected, adding sample data');
@@ -278,7 +270,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   // Add sample data for new users
   const addSampleData = async (userId: string) => {
     try {
-      const sampleMarkets = initialMarkets.map(market => convertMarketToDb(market, userId));
+      const sampleMarkets = getInitialMarkets().map(market => convertMarketToDb(market, userId));
       const { error } = await supabase
         .from('markets')
         .insert(sampleMarkets);
