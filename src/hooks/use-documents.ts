@@ -69,18 +69,20 @@ export function useDocuments() {
 
       console.log('User authenticated for upload:', user.id);
 
-      const uploadPromises = Array.from(files).map(async (file) => {
-        console.log('Uploading file:', file.name, 'size:', file.size);
+      const uploadPromises = Array.from(files).map(async (file, index) => {
+        console.log(`Uploading file ${index + 1}:`, file.name, 'size:', file.size, 'type:', file.type);
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}-${file.name}`;
         
         console.log('Storage path:', fileName);
         
         // Upload to storage
-        const { error: uploadError } = await supabase.storage
+        console.log('About to upload to storage...');
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from('documents')
           .upload(fileName, file);
 
+        console.log('Storage upload result:', { uploadData, uploadError });
         if (uploadError) {
           console.error('Storage upload error:', uploadError);
           throw uploadError;
@@ -89,17 +91,21 @@ export function useDocuments() {
         console.log('File uploaded to storage successfully, saving to database...');
 
         // Save to database
-        const { error: dbError } = await supabase
-          .from('documents')
-          .insert({
-            user_id: user.id,
-            file_name: file.name,
-            file_size: file.size,
-            file_type: file.type || 'application/octet-stream',
-            document_type: documentType,
-            storage_path: fileName
-          });
+        const documentData = {
+          user_id: user.id,
+          file_name: file.name,
+          file_size: file.size,
+          file_type: file.type || 'application/octet-stream',
+          document_type: documentType,
+          storage_path: fileName
+        };
+        console.log('Inserting document data:', documentData);
 
+        const { data: dbData, error: dbError } = await supabase
+          .from('documents')
+          .insert(documentData);
+
+        console.log('Database insert result:', { dbData, dbError });
         if (dbError) {
           console.error('Database insert error:', dbError);
           throw dbError;
