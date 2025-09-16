@@ -352,16 +352,22 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
   const addMarket = async (market: Market) => {
     try {
+      console.log('addMarket called with:', market);
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No user found when adding market');
         return;
       }
 
+      console.log('User found, converting market to DB format...');
       const dbMarket = convertMarketToDb(market, user.id);
+      console.log('DB market object:', dbMarket);
+      
       // Remove id to let database auto-generate UUID
       const { id, ...dbMarketWithoutId } = dbMarket;
+      console.log('DB market without ID:', dbMarketWithoutId);
       
+      console.log('Inserting market into database...');
       const { data, error } = await supabase
         .from('markets')
         .insert([dbMarketWithoutId])
@@ -369,16 +375,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
         .single();
 
       if (error) {
-        console.error('Error adding market:', error);
+        console.error('Database error adding market:', error);
+        console.error('Error details:', JSON.stringify(error, null, 2));
         return;
       }
 
-      console.log('Market added successfully:', data);
+      console.log('Market added successfully to database:', data);
       // Convert the database result back to Market format and add to local state
       const newMarket = convertDbToMarket(data);
-      setMarkets(prev => [newMarket, ...prev]);
+      console.log('Converted market for local state:', newMarket);
+      setMarkets(prev => {
+        console.log('Updating local markets state, prev length:', prev.length);
+        const updated = [newMarket, ...prev];
+        console.log('New markets state length:', updated.length);
+        return updated;
+      });
     } catch (error) {
-      console.error('Error in addMarket:', error);
+      console.error('Unexpected error in addMarket:', error);
+      console.error('Error stack:', error.stack);
     }
   };
 
