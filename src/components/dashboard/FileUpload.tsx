@@ -95,12 +95,16 @@ export function FileUpload() {
   };
 
   const handleFiles = async (files: FileList) => {
+    console.log('handleFiles called with:', files.length, 'files');
     await uploadFiles(files, 'other');
   };
 
   const onButtonClick = () => {
+    console.log('File input clicked');
     fileInputRef.current?.click();
   };
+
+  console.log('FileUpload component rendered, documents:', documents.length, 'loading:', loading);
   return (
     <Card>
       <CardHeader>
