@@ -112,6 +112,7 @@ interface AllDocumentsProps {
 export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
+  const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { documents, loading, uploadFiles, downloadDocument, deleteDocument } = useDocuments();
 
@@ -119,10 +120,15 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
     const files = event.target.files;
     if (files && files.length > 0) {
       console.log("Selected files for upload:", files);
-      await uploadFiles(files, filterType === "all" ? "other" : filterType);
-      // Reset the input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      setUploading(true);
+      try {
+        await uploadFiles(files, filterType === "all" ? "other" : filterType);
+      } finally {
+        setUploading(false);
+        // Reset the input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     }
   };
@@ -160,8 +166,14 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
               <p className="text-xs text-muted-foreground mt-1 px-2">
                 Insurance documents, permits, certifications (PDF, JPG, PNG)
               </p>
-              <Button variant="outline" size="sm" className="mt-4 min-h-[44px]" onClick={triggerFileSelect}>
-                Browse Files
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-4 min-h-[44px]" 
+                onClick={triggerFileSelect}
+                disabled={uploading}
+              >
+                {uploading ? "Uploading..." : "Browse Files"}
               </Button>
               <input
                 ref={fileInputRef}
@@ -202,7 +214,7 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
         </h3>
       </div>
 
-      {loading ? (
+      {loading && documents.length === 0 ? (
         <Card>
           <CardContent className="p-6 sm:p-8 text-center">
             <p className="text-sm text-muted-foreground">Loading documents...</p>
