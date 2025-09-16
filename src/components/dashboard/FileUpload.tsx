@@ -1,47 +1,26 @@
 import { useState, useRef } from "react";
-import { Upload, FileText, Share2, Check, FolderOpen, Download } from "lucide-react";
+import { Upload, FileText, Share2, FolderOpen, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useDocuments } from "@/hooks/use-documents";
+import { formatFileSize } from "@/lib/utils";
 
-interface UploadedFile {
-  id: string;
-  name: string;
-  size: string;
-  uploadDate: string;
-  type: "insurance" | "permit" | "certification";
-  shared: boolean;
-}
-
-// Empty array for new users - no pre-populated files
-const mockFiles: UploadedFile[] = [];
-
-function FileItem({ file }: { file: UploadedFile }) {
-  const handleDownload = () => {
-    // Create a dummy file for download demonstration
-    const content = `Document: ${file.name}\nType: ${file.type}\nSize: ${file.size}\nUploaded: ${new Date(file.uploadDate).toLocaleDateString()}`;
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = file.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
-  };
-
+function FileItem({ document, onDownload }: { 
+  document: any; 
+  onDownload: (doc: any) => void;
+}) {
   const handleShare = () => {
-    const subject = `Shared Document: ${file.name}`;
+    const subject = `Shared Document: ${document.file_name}`;
     const body = `I'm sharing the following document with you:
 
-Document: ${file.name}
-Type: ${file.type}
-Size: ${file.size}
-Uploaded: ${new Date(file.uploadDate).toLocaleDateString()}
+Document: ${document.file_name}
+Type: ${document.document_type}
+Size: ${formatFileSize(document.file_size)}
+Uploaded: ${new Date(document.created_at).toLocaleDateString()}
 
-IMPORTANT: Please manually attach the file "${file.name}" to this email before sending.
+IMPORTANT: Please manually attach the file "${document.file_name}" to this email before sending.
 
 You can download the file and attach it to share with others.`;
     window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`);
@@ -52,17 +31,20 @@ You can download the file and attach it to share with others.`;
       <div className="flex items-center space-x-3 min-w-0 flex-1">
         <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground shrink-0" />
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-sm truncate">{file.name}</p>
+          <p className="font-medium text-sm truncate">{document.file_name}</p>
           <p className="text-xs text-muted-foreground">
-            {file.size} • {new Date(file.uploadDate).toLocaleDateString()}
+            {formatFileSize(document.file_size)} • {new Date(document.created_at).toLocaleDateString()}
           </p>
         </div>
       </div>
       <div className="flex items-center space-x-2 self-end sm:self-auto shrink-0">
+        <Badge variant="secondary" className="text-xs">
+          {document.document_type}
+        </Badge>
         <Button 
           variant="ghost" 
           size="sm" 
-          onClick={handleDownload}
+          onClick={() => onDownload(document)}
           className="hover:bg-muted min-h-[40px] min-w-[40px]"
         >
           <Download className="h-4 w-4" />
@@ -83,6 +65,7 @@ You can download the file and attach it to share with others.`;
 export function FileUpload() {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { documents, loading, uploadFiles, downloadDocument } = useDocuments();
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -111,11 +94,8 @@ export function FileUpload() {
     }
   };
 
-  const handleFiles = (files: FileList) => {
-    // Here you would typically upload the files
-    console.log("Files to upload:", Array.from(files));
-    // For now, just show an alert
-    alert(`Selected ${files.length} file(s) for upload`);
+  const handleFiles = async (files: FileList) => {
+    await uploadFiles(files, 'other');
   };
 
   const onButtonClick = () => {
@@ -166,11 +146,19 @@ export function FileUpload() {
           </div>
         </div>
         
-        {mockFiles.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-4 text-muted-foreground">
+            <p className="text-sm">Loading files...</p>
+          </div>
+        ) : documents.length > 0 ? (
           <div className="space-y-2">
             <h4 className="text-sm font-medium">Recent Files</h4>
-            {mockFiles.map((file) => (
-              <FileItem key={file.id} file={file} />
+            {documents.slice(0, 3).map((document) => (
+              <FileItem 
+                key={document.id} 
+                document={document} 
+                onDownload={downloadDocument}
+              />
             ))}
           </div>
         ) : (
