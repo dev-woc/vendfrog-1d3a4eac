@@ -28,9 +28,9 @@ export type Database = {
           estimated_profit: number
           fee: number
           id: string
-          load_in_time: string
-          market_end_time: string
-          market_start_time: string
+          load_in_time: string | null
+          market_end_time: string | null
+          market_start_time: string | null
           name: string
           organizer_contact: string | null
           requirements: string[] | null
@@ -54,9 +54,9 @@ export type Database = {
           estimated_profit: number
           fee: number
           id?: string
-          load_in_time: string
-          market_end_time: string
-          market_start_time: string
+          load_in_time?: string | null
+          market_end_time?: string | null
+          market_start_time?: string | null
           name: string
           organizer_contact?: string | null
           requirements?: string[] | null
@@ -80,9 +80,9 @@ export type Database = {
           estimated_profit?: number
           fee?: number
           id?: string
-          load_in_time?: string
-          market_end_time?: string
-          market_start_time?: string
+          load_in_time?: string | null
+          market_end_time?: string | null
+          market_start_time?: string | null
           name?: string
           organizer_contact?: string | null
           requirements?: string[] | null
