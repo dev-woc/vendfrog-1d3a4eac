@@ -20,19 +20,29 @@ export function useDocuments() {
 
   const fetchDocuments = async () => {
     try {
+      console.log('Fetching documents...');
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        console.log('No user found, skipping document fetch');
+        setLoading(false);
+        return;
+      }
 
+      console.log('User found, fetching documents for:', user.id);
       const { data, error } = await supabase
         .from('documents')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching documents:', error);
+        throw error;
+      }
+      console.log('Documents fetched:', data);
       setDocuments(data || []);
     } catch (error) {
-      console.error('Error fetching documents:', error);
+      console.error('Error in fetchDocuments:', error);
       toast({
         title: "Error",
         description: "Failed to fetch documents",
@@ -45,8 +55,10 @@ export function useDocuments() {
 
   const uploadFiles = async (files: FileList, documentType: string = 'other') => {
     try {
+      console.log('Starting file upload for:', files.length, 'files');
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
+        console.error('No user found for upload');
         toast({
           title: "Error",
           description: "You must be logged in to upload files",
@@ -55,16 +67,26 @@ export function useDocuments() {
         return;
       }
 
+      console.log('User authenticated for upload:', user.id);
+
       const uploadPromises = Array.from(files).map(async (file) => {
+        console.log('Uploading file:', file.name, 'size:', file.size);
         const fileExt = file.name.split('.').pop();
         const fileName = `${user.id}/${Date.now()}-${file.name}`;
+        
+        console.log('Storage path:', fileName);
         
         // Upload to storage
         const { error: uploadError } = await supabase.storage
           .from('documents')
           .upload(fileName, file);
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          throw uploadError;
+        }
+
+        console.log('File uploaded to storage successfully, saving to database...');
 
         // Save to database
         const { error: dbError } = await supabase
@@ -78,11 +100,17 @@ export function useDocuments() {
             storage_path: fileName
           });
 
-        if (dbError) throw dbError;
+        if (dbError) {
+          console.error('Database insert error:', dbError);
+          throw dbError;
+        }
+
+        console.log('File saved to database successfully');
       });
 
       await Promise.all(uploadPromises);
       
+      console.log('All files uploaded successfully');
       toast({
         title: "Success",
         description: `${files.length} file(s) uploaded successfully`
