@@ -358,8 +358,8 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
         <AddMarketModal
           open={isAddModalOpen}
           onOpenChange={setIsAddModalOpen}
-          onAddMarket={(market) => {
-            addMarket(market);
+          onAddMarket={async (market) => {
+            await addMarket(market);
             setIsAddModalOpen(false);
           }}
         />
