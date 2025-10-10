@@ -78,24 +78,30 @@ export function useDocuments() {
   const fetchDocuments = async () => {
     try {
       console.log('Fetching documents...');
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+
+      // Get user ID from localStorage
+      const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+      let userId = null;
+      if (authToken) {
+        try {
+          const parsed = JSON.parse(authToken);
+          userId = parsed.user?.id;
+        } catch (e) {
+          console.error('Failed to parse auth token:', e);
+        }
+      }
+
+      if (!userId) {
         console.log('No user found, skipping document fetch');
         setLoading(false);
         return;
       }
 
-      console.log('User found, fetching documents for:', user.id);
-      const { data, error } = await supabase
-        .from('documents')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+      console.log('User found, fetching documents for:', userId);
+      const data = await supabaseFetch(`/documents?user_id=eq.${userId}&order=created_at.desc`, {
+        method: 'GET'
+      });
 
-      if (error) {
-        console.error('Error fetching documents:', error);
-        throw error;
-      }
       console.log('Documents fetched:', data);
       setDocuments(data || []);
     } catch (error) {
@@ -270,12 +276,21 @@ export function useDocuments() {
     );
 
     // Also fetch on initial mount if user is already logged in
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user && !hasFetched) {
-        hasFetched = true;
-        fetchDocuments();
+    const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+    if (authToken && !hasFetched) {
+      try {
+        const parsed = JSON.parse(authToken);
+        if (parsed.user?.id) {
+          hasFetched = true;
+          fetchDocuments();
+        }
+      } catch (e) {
+        console.error('Failed to parse auth token on mount:', e);
+        setLoading(false);
       }
-    });
+    } else {
+      setLoading(false);
+    }
 
     return () => subscription.unsubscribe();
   }, []);
