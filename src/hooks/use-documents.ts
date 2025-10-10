@@ -116,15 +116,17 @@ export function useDocuments() {
       });
 
       await Promise.all(uploadPromises);
-      
-      console.log('All files uploaded successfully');
-      toast({
-        title: "Success",
-        description: `${files.length} file(s) uploaded successfully`
-      });
 
-      // Refresh documents
-      await fetchDocuments();
+      console.log('All files uploaded successfully');
+
+      // Refresh documents with a small delay to ensure DB is updated
+      setTimeout(async () => {
+        await fetchDocuments();
+        toast({
+          title: "Success",
+          description: `${files.length} file(s) uploaded successfully`
+        });
+      }, 500);
     } catch (error) {
       console.error('Error uploading files:', error);
       toast({
@@ -196,13 +198,17 @@ export function useDocuments() {
   };
 
   useEffect(() => {
+    let hasFetched = false;
+
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Documents hook - Auth state changed:', event, session?.user?.id);
-        if (session?.user) {
+        if (session?.user && !hasFetched) {
+          hasFetched = true;
           fetchDocuments();
-        } else {
+        } else if (!session?.user) {
+          hasFetched = false;
           setDocuments([]);
           setLoading(false);
         }
@@ -211,7 +217,8 @@ export function useDocuments() {
 
     // Also fetch on initial mount if user is already logged in
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
+      if (session?.user && !hasFetched) {
+        hasFetched = true;
         fetchDocuments();
       }
     });
