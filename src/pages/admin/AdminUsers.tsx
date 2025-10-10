@@ -13,6 +13,32 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft } from "lucide-react";
 
+// Helper to get auth token
+const getAuthToken = () => {
+  const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+  if (authToken) {
+    try {
+      const parsed = JSON.parse(authToken);
+      return parsed.access_token;
+    } catch (e) {
+      console.error('Failed to parse auth token:', e);
+    }
+  }
+  return null;
+};
+
+const supabaseFetch = async (path: string) => {
+  const accessToken = getAuthToken();
+  const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1${path}`, {
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+      'Authorization': `Bearer ${accessToken}`,
+    },
+  });
+  return response.json();
+};
+
 interface User {
   id: string;
   user_id: string;
@@ -33,23 +59,19 @@ export default function AdminUsers() {
   }, []);
 
   const loadUsers = async () => {
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('*')
-      .order('created_at', { ascending: false });
+    try {
+      // Get profiles
+      const profiles = await supabaseFetch('/profiles?order=created_at.desc');
 
-    if (profiles) {
-      // Get emails from auth.users
-      const usersWithEmails = await Promise.all(
-        profiles.map(async (profile) => {
-          const { data } = await supabase.auth.admin.getUserById(profile.user_id);
-          return {
-            ...profile,
-            email: data.user?.email
-          };
-        })
-      );
-      setUsers(usersWithEmails as User[]);
+      if (profiles && profiles.length > 0) {
+        // Get all user emails from the database query
+        // We'll query auth.users directly using SQL via a database function
+        // For now, let's just show the profiles without emails from auth
+        // The email should be stored in profiles if it was set during signup
+        setUsers(profiles as User[]);
+      }
+    } catch (error) {
+      console.error('Error loading users:', error);
     }
   };
 
