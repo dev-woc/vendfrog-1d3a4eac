@@ -353,8 +353,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const addMarket = async (market: Market) => {
     try {
       console.log('addMarket called with:', market);
+
+      // Check localStorage first
+      const authStorage = localStorage.getItem('supabase.auth.token');
+      console.log('Auth storage in localStorage:', authStorage ? 'exists' : 'missing');
+
       console.log('About to call supabase.auth.getSession()...');
-      const { data: { session }, error: authError } = await supabase.auth.getSession();
+
+      // Add timeout wrapper
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('getSession timeout after 5s')), 5000)
+      );
+
+      const { data: { session }, error: authError } = await Promise.race([
+        sessionPromise,
+        timeoutPromise
+      ]) as any;
+
       console.log('getSession result:', { session, authError });
 
       if (authError) {
