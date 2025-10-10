@@ -1,8 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT tablename, policyname, cmd FROM pg_policies WHERE schemaname = ''public'' AND tablename IN (''profiles'', ''markets'', ''documents'') AND policyname LIKE ''%Admin%'' ORDER BY tablename, policyname;\")",
-      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT user_id, is_admin FROM profiles WHERE is_admin = true;\")"
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT tablename, policyname FROM pg_policies WHERE schemaname = ''public'' AND policyname LIKE ''%Admin%'';\")"
     ],
     "deny": [],
     "ask": []
