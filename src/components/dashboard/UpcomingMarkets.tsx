@@ -383,19 +383,27 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   return (
     <div className="space-y-6">
       {/* Mobile Filter Dropdown */}
-      <div className="block sm:hidden">
-        <Select value={activeFilter} onValueChange={setActiveFilter}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all-upcoming">All Upcoming</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="confirmed">Confirmed</SelectItem>
-            <SelectItem value="upcoming">This Week</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="block sm:hidden space-y-3">
+        <div className="flex items-center gap-2">
+          <Select value={activeFilter} onValueChange={setActiveFilter}>
+            <SelectTrigger className="flex-1">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all-upcoming">All Upcoming</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="upcoming">This Week</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+          <Button
+            onClick={() => setIsAddModalOpen(true)}
+            className="min-h-[44px] px-4 text-sm whitespace-nowrap"
+          >
+            Add Market
+          </Button>
+        </div>
       </div>
 
       {/* Desktop Tabs */}
