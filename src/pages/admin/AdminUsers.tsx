@@ -70,9 +70,11 @@ export default function AdminUsers() {
 
   const loadUsers = async () => {
     try {
+      console.log('Loading users...');
       const profiles = await supabaseFetch('/profiles?order=created_at.desc', {
         method: 'GET'
       });
+      console.log('Users loaded:', profiles);
 
       if (profiles && profiles.length > 0) {
         setUsers(profiles as User[]);

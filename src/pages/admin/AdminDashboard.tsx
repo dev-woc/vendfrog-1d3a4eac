@@ -64,7 +64,9 @@ export default function AdminDashboard() {
       return;
     }
 
-    const profiles = await supabaseFetch(`/profiles?user_id=eq.${userId}&select=is_admin`);
+    const profiles = await supabaseFetch(`/profiles?user_id=eq.${userId}`, {
+      method: 'GET'
+    });
     const profile = profiles?.[0];
 
     if (!profile?.is_admin) {
@@ -110,7 +112,9 @@ export default function AdminDashboard() {
       const documentsCount = parseInt(documentsResponse.headers.get('Content-Range')?.split('/')[1] || '0');
 
       // Get total revenue
-      const markets = await supabaseFetch('/markets?select=actual_revenue&actual_revenue=not.is.null');
+      const markets = await supabaseFetch('/markets?actual_revenue=not.is.null', {
+        method: 'GET'
+      });
       const totalRevenue = markets?.reduce((sum: number, m: any) => sum + (parseFloat(m.actual_revenue) || 0), 0) || 0;
 
       setStats({

@@ -70,9 +70,11 @@ export default function AdminDocuments() {
 
   const loadDocuments = async () => {
     try {
+      console.log('Loading documents...');
       const documents = await supabaseFetch('/documents?order=created_at.desc', {
         method: 'GET'
       });
+      console.log('Documents loaded:', documents);
       if (documents && documents.length > 0) {
         setDocuments(documents as Document[]);
       } else {
