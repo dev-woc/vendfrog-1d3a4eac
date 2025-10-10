@@ -38,11 +38,19 @@ export const CalendarSyncDropdown = ({
   );
 
   const validateMarketForSync = (market: Market): string | null => {
-    if (!market.loadInTime && !market.marketStartTime) {
-      return "Market start time is missing. Please edit the market to add times.";
+    const startTime = market.loadInTime || market.marketStartTime;
+    const endTime = market.marketEndTime;
+
+    // Check if times are missing or set to placeholder values
+    const isInvalidTime = (time: string | undefined) => {
+      return !time || time === 'TBA' || time.trim() === '';
+    };
+
+    if (isInvalidTime(startTime)) {
+      return "Market start time is missing or set to TBA. Please edit the market to add specific times.";
     }
-    if (!market.marketEndTime) {
-      return "Market end time is missing. Please edit the market to add times.";
+    if (isInvalidTime(endTime)) {
+      return "Market end time is missing or set to TBA. Please edit the market to add specific times.";
     }
     return null;
   };
