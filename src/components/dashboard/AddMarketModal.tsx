@@ -248,6 +248,9 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
+            <DialogDescription>
+              {editingMarket ? "Edit the details of your market." : "Fill in the details to add a new market."}
+            </DialogDescription>
             {editingMarket && (
               <div className="flex items-center gap-2">
                 {isSaving && <Progress value={100} className="w-16 h-2" />}
