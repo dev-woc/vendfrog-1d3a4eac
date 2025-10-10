@@ -4,10 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LocationTicker } from "@/components/ui/LocationTicker";
 import { AlertsDropdown } from "@/components/dashboard/AlertsDropdown";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface DashboardHeaderProps {
   vendorName?: string;
@@ -15,6 +16,8 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
   const { setTheme, theme } = useTheme();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [userProfile, setUserProfile] = useState<{ full_name: string; } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -160,8 +163,29 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={async () => {
-                await supabase.auth.signOut();
-                window.location.href = '/auth';
+                try {
+                  const { error } = await supabase.auth.signOut();
+                  if (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to log out. Please try again.",
+                      variant: "destructive"
+                    });
+                  } else {
+                    toast({
+                      title: "Logged out",
+                      description: "You have been successfully logged out."
+                    });
+                    navigate('/auth');
+                  }
+                } catch (err) {
+                  console.error('Logout error:', err);
+                  toast({
+                    title: "Error",
+                    description: "An unexpected error occurred.",
+                    variant: "destructive"
+                  });
+                }
               }}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
