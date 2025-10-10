@@ -251,8 +251,8 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       const newMarket = convertDbToMarket(data);
 
       setMarkets(prev => [newMarket, ...prev]);
-    } catch (error) {
-      console.error('Unexpected error in addMarket:', error);
+    } catch (error: any) {
+      console.error('Error adding market to database:', error);
       throw error;
     }
   };
