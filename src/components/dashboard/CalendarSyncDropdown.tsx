@@ -23,23 +23,46 @@ interface CalendarSyncDropdownProps {
   markets: Market[];
   selectedMarket?: Market | null;
   onSyncComplete?: () => void;
+  onEditMarket?: (market: Market) => void;
 }
 
-export const CalendarSyncDropdown = ({ 
-  markets, 
-  selectedMarket, 
-  onSyncComplete 
+export const CalendarSyncDropdown = ({
+  markets,
+  selectedMarket,
+  onSyncComplete,
+  onEditMarket
 }: CalendarSyncDropdownProps) => {
   const { toast } = useToast();
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(
     localStorage.getItem('lastCalendarSync')
   );
 
+  const validateMarketForSync = (market: Market): string | null => {
+    if (!market.loadInTime && !market.marketStartTime) {
+      return "Market start time is missing. Please edit the market to add times.";
+    }
+    if (!market.marketEndTime) {
+      return "Market end time is missing. Please edit the market to add times.";
+    }
+    return null;
+  };
+
   const handleSync = (platform: 'apple' | 'google' | 'ics', bulkSync = false) => {
     try {
       console.log('Starting sync for platform:', platform, 'bulkSync:', bulkSync);
-      
+
       if (bulkSync && markets.length > 0) {
+        // Validate all markets before bulk sync
+        const invalidMarkets = markets.filter(m => validateMarketForSync(m) !== null);
+        if (invalidMarkets.length > 0) {
+          toast({
+            title: "Cannot Sync",
+            description: `${invalidMarkets.length} market(s) are missing time information. Please edit them to add start and end times.`,
+            variant: "destructive",
+          });
+          return;
+        }
+
         console.log('Bulk syncing markets:', markets.length);
         bulkSyncMarkets(markets, platform);
         toast({
@@ -47,10 +70,25 @@ export const CalendarSyncDropdown = ({
           description: `Syncing ${markets.length} markets to ${platform === 'apple' ? 'Apple Calendar' : platform === 'google' ? 'Google Calendar' : 'ICS files'}.`,
         });
       } else if (selectedMarket) {
+        // Validate single market before sync
+        const validationError = validateMarketForSync(selectedMarket);
+        if (validationError) {
+          toast({
+            title: "Cannot Sync Market",
+            description: validationError,
+            variant: "destructive",
+            action: onEditMarket ? {
+              label: "Edit Market",
+              onClick: () => onEditMarket(selectedMarket)
+            } : undefined
+          });
+          return;
+        }
+
         console.log('Syncing single market:', selectedMarket.name);
         const event = marketToCalendarEvent(selectedMarket);
         console.log('Generated calendar event:', event);
-        
+
         switch (platform) {
           case 'apple':
             syncToAppleCalendar(event);
@@ -62,7 +100,7 @@ export const CalendarSyncDropdown = ({
             downloadICSFile(event);
             break;
         }
-        
+
         toast({
           title: "Calendar Sync",
           description: `Market "${selectedMarket.name}" synced to ${platform === 'apple' ? 'Apple Calendar' : platform === 'google' ? 'Google Calendar' : 'calendar file'}.`,
@@ -70,12 +108,12 @@ export const CalendarSyncDropdown = ({
       } else {
         throw new Error('No market selected for sync');
       }
-      
+
       const syncTime = new Date().toLocaleString();
       setLastSyncTime(syncTime);
       localStorage.setItem('lastCalendarSync', syncTime);
       onSyncComplete?.();
-      
+
     } catch (error) {
       console.error('Calendar sync error:', error);
       toast({

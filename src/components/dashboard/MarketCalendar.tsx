@@ -17,7 +17,9 @@ export const MarketCalendar = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [isDateDetailsModalOpen, setIsDateDetailsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedMarket, setSelectedMarket] = useState<any>(null);
+  const [editingMarket, setEditingMarket] = useState<any>(null);
   
   const upcomingMarkets = getUpcomingMarkets();
   
@@ -55,6 +57,17 @@ export const MarketCalendar = () => {
     }
   };
 
+  const handleEditMarket = (market: any) => {
+    setEditingMarket(market);
+    setIsEditModalOpen(true);
+  };
+
+  const handleEditComplete = (updatedMarket: any) => {
+    updateMarket(updatedMarket);
+    setIsEditModalOpen(false);
+    setEditingMarket(null);
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -68,9 +81,10 @@ export const MarketCalendar = () => {
               View your upcoming markets and click any date to see details or add new markets
             </CardDescription>
           </div>
-          <CalendarSyncDropdown 
+          <CalendarSyncDropdown
             markets={upcomingMarkets}
             selectedMarket={selectedMarket}
+            onEditMarket={handleEditMarket}
           />
         </div>
       </CardHeader>
@@ -139,9 +153,10 @@ export const MarketCalendar = () => {
                         {market.address.city}, {market.address.state}
                       </div>
                     </div>
-                    <CalendarSyncDropdown 
+                    <CalendarSyncDropdown
                       markets={[market]}
                       selectedMarket={market}
+                      onEditMarket={handleEditMarket}
                     />
                   </div>
                 </div>
@@ -177,11 +192,19 @@ export const MarketCalendar = () => {
           onUpdateMarket={updateMarket}
         />
 
+        <AddMarketModal
+          open={isEditModalOpen}
+          onOpenChange={setIsEditModalOpen}
+          onUpdateMarket={handleEditComplete}
+          editingMarket={editingMarket}
+        />
+
         <MarketDetailsModal
           market={selectedMarket}
           open={isDetailsModalOpen}
           onOpenChange={setIsDetailsModalOpen}
           onUpdateChecklist={updateMarketChecklist}
+          onEditMarket={handleEditMarket}
         />
 
         <DateDetailsModal
