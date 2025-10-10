@@ -353,20 +353,21 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const addMarket = async (market: Market) => {
     try {
       console.log('addMarket called with:', market);
-      console.log('About to call supabase.auth.getUser()...');
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      console.log('getUser result:', { user, authError });
+      console.log('About to call supabase.auth.getSession()...');
+      const { data: { session }, error: authError } = await supabase.auth.getSession();
+      console.log('getSession result:', { session, authError });
 
       if (authError) {
         console.error('Auth error:', authError);
         throw new Error(`Authentication error: ${authError.message}`);
       }
 
-      if (!user) {
-        console.error('No user found when adding market');
+      if (!session?.user) {
+        console.error('No user session found when adding market');
         throw new Error('You must be logged in to add a market');
       }
 
+      const user = session.user;
       console.log('User found:', user.id);
       console.log('Converting market to DB format...');
       const dbMarket = convertMarketToDb(market, user.id);
@@ -407,8 +408,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
   const updateMarket = async (updatedMarket: Market) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const user = session.user;
 
       const dbMarket = convertMarketToDb(updatedMarket, user.id);
       const { error } = await supabase
