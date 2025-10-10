@@ -1,24 +1,49 @@
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
-
-const monthlyData = [
-  { month: "Aug", revenue: 2800, markets: 6 },
-  { month: "Sep", revenue: 3200, markets: 7 },
-  { month: "Oct", revenue: 2900, markets: 6 },
-  { month: "Nov", revenue: 3800, markets: 8 },
-  { month: "Dec", revenue: 4200, markets: 9 },
-  { month: "Jan", revenue: 3600, markets: 7 },
-];
-
-const marketData = [
-  { name: "Farmers Market", count: 15, revenue: 4800 },
-  { name: "Art Fair", count: 8, revenue: 3200 },
-  { name: "Night Market", count: 6, revenue: 2400 },
-  { name: "Holiday Market", count: 4, revenue: 2800 },
-];
+import { useMarkets } from "@/contexts/MarketContext";
+import { useMemo } from "react";
 
 export function RevenueChart() {
+  const { markets } = useMarkets();
+
+  // Calculate monthly revenue from actual market data
+  const monthlyData = useMemo(() => {
+    const monthlyStats: { [key: string]: { revenue: number; markets: number } } = {};
+
+    // Group markets by month and calculate totals
+    markets.forEach(market => {
+      if (market.actualRevenue) {
+        const date = new Date(market.date);
+        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+
+        if (!monthlyStats[monthKey]) {
+          monthlyStats[monthKey] = { revenue: 0, markets: 0 };
+        }
+
+        monthlyStats[monthKey].revenue += market.actualRevenue;
+        monthlyStats[monthKey].markets += 1;
+      }
+    });
+
+    // Convert to array and sort by date
+    const sortedData = Object.entries(monthlyStats)
+      .map(([month, stats]) => ({
+        month,
+        revenue: stats.revenue,
+        markets: stats.markets
+      }))
+      .sort((a, b) => {
+        // Sort by date
+        return new Date(a.month).getTime() - new Date(b.month).getTime();
+      })
+      .slice(-6); // Show last 6 months
+
+    // If no data, return empty array
+    return sortedData.length > 0 ? sortedData : [
+      { month: "No Data", revenue: 0, markets: 0 }
+    ];
+  }, [markets]);
   return (
     <Card>
       <CardHeader>

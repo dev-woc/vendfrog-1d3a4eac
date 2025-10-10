@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT tablename, policyname FROM pg_policies WHERE schemaname = ''public'' AND policyname LIKE ''%Admin%'';\")"
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT tablename, policyname FROM pg_policies WHERE schemaname = ''public'' AND policyname LIKE ''%Admin%'';\")",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT id, name, user_id, date FROM markets WHERE user_id = ''20ddac72-c64d-4597-ad82-f5714a4dc350'' LIMIT 5;\")",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"\n-- Test if the is_admin function works\nSET request.jwt.claim.sub = ''20ddac72-c64d-4597-ad82-f5714a4dc350'';\nSELECT public.is_admin();\n\")"
     ],
     "deny": [],
     "ask": []
