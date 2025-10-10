@@ -156,7 +156,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Form submitted with data:', formData);
-    
+
     // Validate required fields
     if (!formData.name.trim()) {
       toast({
@@ -166,10 +166,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       });
       return;
     }
-    
+
     if (!formData.date) {
       toast({
-        title: "Validation Error", 
+        title: "Validation Error",
         description: "Market date is required.",
         variant: "destructive",
       });
@@ -177,7 +177,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     }
 
     setIsSaving(true);
-    
+
     const marketData = {
       ...formData,
       fee: parseFloat(formData.fee) || 0,
@@ -198,6 +198,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
           ...marketData,
         };
         await onUpdateMarket?.(updatedMarket);
+        console.log('Market update completed');
       } else {
         // Add new market
         console.log('Adding new market');
@@ -206,23 +207,29 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
           ...marketData,
         };
         console.log('New market object:', newMarket);
+        console.log('Calling onAddMarket...');
         await onAddMarket?.(newMarket);
+        console.log('onAddMarket completed successfully');
       }
 
       setHasUnsavedChanges(false);
-      
+
       toast({
         title: editingMarket ? "Market Updated" : "Market Added",
         description: editingMarket ? "Market details have been updated successfully." : "New market has been added successfully.",
       });
-      
+
       // Only close modal after successful operation
+      console.log('Closing modal...');
       onOpenChange(false);
-    } catch (error) {
+      console.log('Modal closed');
+    } catch (error: any) {
       console.error('Error in handleSubmit:', error);
+      console.error('Error message:', error?.message);
+      console.error('Error stack:', error?.stack);
       toast({
         title: "Error",
-        description: "Failed to save market. Please try again.",
+        description: error?.message || "Failed to save market. Please try again.",
         variant: "destructive",
       });
     } finally {
