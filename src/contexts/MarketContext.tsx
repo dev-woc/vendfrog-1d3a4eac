@@ -224,12 +224,11 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
   const addMarket = async (market: Market) => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+      if (!currentUserId) {
         throw new Error('You must be logged in to add a market');
       }
 
-      const dbMarket = convertMarketToDb(market, user.id);
+      const dbMarket = convertMarketToDb(market, currentUserId);
       const { id, ...dbMarketWithoutId } = dbMarket;
 
       const responseData = await supabaseFetch('/markets', {

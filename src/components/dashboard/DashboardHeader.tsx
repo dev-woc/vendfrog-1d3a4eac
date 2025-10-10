@@ -20,21 +20,39 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          console.log('Fetching profile for user:', user.id);
-          const { data: profile, error } = await supabase
-            .from('profiles')
-            .select('full_name, company_name, phone_number')
-            .eq('user_id', user.id)
-            .maybeSingle();
-          
-          if (error) {
-            console.error('Error fetching profile:', error);
-          } else {
-            console.log('Profile fetched:', profile);
-            setUserProfile(profile);
+        // Get user ID from localStorage
+        const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+        let userId = null;
+        if (authToken) {
+          try {
+            const parsed = JSON.parse(authToken);
+            userId = parsed.user?.id;
+          } catch (e) {
+            console.error('Failed to parse auth token:', e);
+            return;
           }
+        }
+
+        if (!userId) return;
+
+        console.log('Fetching profile for user:', userId);
+
+        // Fetch profile using direct REST API
+        const accessToken = authToken ? JSON.parse(authToken).access_token : null;
+        const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1/profiles?user_id=eq.${userId}&select=full_name,company_name,phone_number`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+            'Authorization': `Bearer ${accessToken}`,
+          }
+        });
+
+        const profiles = await response.json();
+        const profile = profiles?.[0];
+
+        if (profile) {
+          console.log('Profile fetched:', profile);
+          setUserProfile(profile);
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
