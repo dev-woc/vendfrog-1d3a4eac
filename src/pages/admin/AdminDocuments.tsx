@@ -64,7 +64,10 @@ export default function AdminDocuments() {
   const navigate = useNavigate();
   const [documents, setDocuments] = useState<Document[]>([]);
 
+  console.log('AdminDocuments component mounted');
+
   useEffect(() => {
+    console.log('AdminDocuments useEffect running');
     loadDocuments();
   }, []);
 

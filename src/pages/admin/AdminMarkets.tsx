@@ -65,7 +65,10 @@ export default function AdminMarkets() {
   const navigate = useNavigate();
   const [markets, setMarkets] = useState<Market[]>([]);
 
+  console.log('AdminMarkets component mounted');
+
   useEffect(() => {
+    console.log('AdminMarkets useEffect running');
     loadMarkets();
   }, []);
 

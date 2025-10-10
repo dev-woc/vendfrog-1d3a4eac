@@ -64,7 +64,10 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
 
+  console.log('AdminUsers component mounted');
+
   useEffect(() => {
+    console.log('AdminUsers useEffect running');
     loadUsers();
   }, []);
 
