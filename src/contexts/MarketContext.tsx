@@ -262,12 +262,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
         if (dbMarkets && dbMarkets.length > 0) {
           const convertedMarkets = dbMarkets.map(convertDbToMarket);
-          console.log('Loaded markets from database:', convertedMarkets);
           setMarkets(convertedMarkets);
         } else {
-          // New user - add some sample data
-          console.log('New user detected, adding sample data');
-          await addSampleData(user.id);
+          setMarkets([]);
         }
       } catch (error) {
         console.error('Error in loadMarkets:', error);
@@ -303,34 +300,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Add sample data for new users
-  const addSampleData = async (userId: string) => {
-    try {
-      const sampleMarkets = getInitialMarkets().map(market => convertMarketToDb(market, userId));
-      const { error } = await supabase
-        .from('markets')
-        .insert(sampleMarkets);
-
-      if (error) {
-        console.error('Error adding sample data:', error);
-      } else {
-        console.log('Sample data added successfully');
-        // Reload markets after adding sample data
-        const { data: dbMarkets, error: loadError } = await supabase
-          .from('markets')
-          .select('*')
-          .eq('user_id', userId)
-          .order('date', { ascending: true });
-
-        if (!loadError && dbMarkets) {
-          const convertedMarkets = dbMarkets.map(convertDbToMarket);
-          setMarkets(convertedMarkets);
-        }
-      }
-    } catch (error) {
-      console.error('Error in addSampleData:', error);
-    }
-  };
+  
 
   const updateMarketChecklist = async (marketId: string, checklistItemId: string) => {
     const market = markets.find(m => m.id === marketId);
