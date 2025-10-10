@@ -199,6 +199,7 @@ const convertMarketToDb = (market: Market, userId: string) => ({
 export function MarketProvider({ children }: { children: ReactNode }) {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   // Load user's markets from database
   useEffect(() => {
@@ -250,9 +251,11 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         if (event === 'SIGNED_IN' && session?.user) {
+          setCurrentUserId(session.user.id);
           setIsLoading(true);
           await loadMarkets(session.user);
         } else if (event === 'SIGNED_OUT') {
+          setCurrentUserId(null);
           setMarkets([]);
           setIsLoading(false);
         }
@@ -261,6 +264,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
     // Also check current user on mount
     supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        setCurrentUserId(user.id);
+      }
       loadMarkets(user);
     });
 
@@ -353,46 +359,16 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const addMarket = async (market: Market) => {
     try {
       console.log('addMarket called with:', market);
+      console.log('Current user ID from state:', currentUserId);
 
-      // Check all localStorage keys for debugging
-      const allKeys = Object.keys(localStorage);
-      console.log('All localStorage keys:', allKeys);
-      const supabaseKeys = allKeys.filter(k => k.includes('supabase') || k.includes('sb-'));
-      console.log('Supabase-related keys:', supabaseKeys);
-      supabaseKeys.forEach(key => {
-        const value = localStorage.getItem(key);
-        console.log(`${key}:`, value ? value.substring(0, 100) + '...' : 'null');
-      });
-
-      console.log('About to call supabase.auth.getSession()...');
-
-      // Add timeout wrapper
-      const sessionPromise = supabase.auth.getSession();
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('getSession timeout after 5s')), 5000)
-      );
-
-      const { data: { session }, error: authError } = await Promise.race([
-        sessionPromise,
-        timeoutPromise
-      ]) as any;
-
-      console.log('getSession result:', { session, authError });
-
-      if (authError) {
-        console.error('Auth error:', authError);
-        throw new Error(`Authentication error: ${authError.message}`);
-      }
-
-      if (!session?.user) {
-        console.error('No user session found when adding market');
+      if (!currentUserId) {
+        console.error('No user ID in state - user not logged in');
         throw new Error('You must be logged in to add a market');
       }
 
-      const user = session.user;
-      console.log('User found:', user.id);
+      console.log('User found:', currentUserId);
       console.log('Converting market to DB format...');
-      const dbMarket = convertMarketToDb(market, user.id);
+      const dbMarket = convertMarketToDb(market, currentUserId);
       console.log('DB market object:', dbMarket);
 
       // Remove id to let database auto-generate UUID
@@ -430,11 +406,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
   const updateMarket = async (updatedMarket: Market) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-      const user = session.user;
+      if (!currentUserId) return;
 
-      const dbMarket = convertMarketToDb(updatedMarket, user.id);
+      const dbMarket = convertMarketToDb(updatedMarket, currentUserId);
       const { error } = await supabase
         .from('markets')
         .update(dbMarket)
