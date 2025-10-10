@@ -9,7 +9,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TimeSelector } from "@/components/ui/TimeSelector";
 import { Progress } from "@/components/ui/progress";
-import { CalendarIcon, Save } from "lucide-react";
+import { CalendarIcon, Save, ArrowLeft, X } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
@@ -225,10 +225,12 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         description: editingMarket ? "Market details have been updated successfully." : "New market has been added successfully.",
       });
 
-      // Only close modal after successful operation
-      console.log('Closing modal...');
-      onOpenChange(false);
-      console.log('Modal closed');
+      // Only close modal for new markets, keep open for editing
+      if (!editingMarket) {
+        console.log('Closing modal...');
+        onOpenChange(false);
+        console.log('Modal closed');
+      }
     } catch (error: any) {
       console.error('Error in handleSubmit:', error);
       console.error('Error message:', error?.message);
@@ -248,7 +250,20 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
+            <div className="flex items-center gap-2">
+              {editingMarket && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenChange(false)}
+                  className="h-8 w-8 p-0"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                </Button>
+              )}
+              <DialogTitle>{editingMarket ? "Edit Market" : "Add New Market"}</DialogTitle>
+            </div>
             {editingMarket && (
               <div className="flex items-center gap-2">
                 {isSaving && <Progress value={100} className="w-16 h-2" />}
@@ -536,29 +551,31 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             </div>
           </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
-              Cancel
-            </Button>
-            {editingMarket && (
-              <Button 
-                type="button" 
-                variant="destructive" 
-                onClick={() => {
-                  if (confirm('Are you sure you want to delete this market?')) {
-                    // Call a delete function here - you'll need to add this to the context
-                    onOpenChange(false);
-                  }
-                }}
-                className="flex-1"
-              >
-                Delete Market
+          {editingMarket ? (
+            <div className="space-y-2 pt-4">
+              <Button type="submit" className="w-full">
+                Save Changes
               </Button>
-            )}
-            <Button type="submit" className="flex-1">
-              {editingMarket ? "Update Market" : "Add Market"}
-            </Button>
-          </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                className="w-full"
+              >
+                <X className="mr-2 h-4 w-4" />
+                Close
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
+                Cancel
+              </Button>
+              <Button type="submit" className="flex-1">
+                Add Market
+              </Button>
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>
