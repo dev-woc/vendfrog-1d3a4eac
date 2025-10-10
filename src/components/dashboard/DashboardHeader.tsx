@@ -162,31 +162,42 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                   <span>Help & Support</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={async () => {
-                try {
-                  const { error } = await supabase.auth.signOut();
-                  if (error) {
+              <DropdownMenuItem
+                onClick={async (e) => {
+                  e.preventDefault();
+                  console.log('Logout clicked');
+                  try {
+                    const { error } = await supabase.auth.signOut();
+                    console.log('SignOut result:', { error });
+                    if (error) {
+                      console.error('Logout error:', error);
+                      toast({
+                        title: "Error",
+                        description: "Failed to log out. Please try again.",
+                        variant: "destructive"
+                      });
+                    } else {
+                      console.log('Successfully signed out, navigating to /auth');
+                      toast({
+                        title: "Logged out",
+                        description: "You have been successfully logged out."
+                      });
+                      // Force navigation with a small delay to ensure state updates
+                      setTimeout(() => {
+                        navigate('/auth', { replace: true });
+                        window.location.reload();
+                      }, 100);
+                    }
+                  } catch (err) {
+                    console.error('Logout exception:', err);
                     toast({
                       title: "Error",
-                      description: "Failed to log out. Please try again.",
+                      description: "An unexpected error occurred.",
                       variant: "destructive"
                     });
-                  } else {
-                    toast({
-                      title: "Logged out",
-                      description: "You have been successfully logged out."
-                    });
-                    navigate('/auth');
                   }
-                } catch (err) {
-                  console.error('Logout error:', err);
-                  toast({
-                    title: "Error",
-                    description: "An unexpected error occurred.",
-                    variant: "destructive"
-                  });
-                }
-              }}>
+                }}
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>
