@@ -196,6 +196,42 @@ const convertMarketToDb = (market: Market, userId: string) => ({
   completed_date: market.completedDate
 });
 
+// Helper function to get auth token and make Supabase REST API calls
+const getAuthToken = () => {
+  const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+  if (authToken) {
+    try {
+      const parsed = JSON.parse(authToken);
+      return parsed.access_token;
+    } catch (e) {
+      console.error('Failed to parse auth token:', e);
+    }
+  }
+  return null;
+};
+
+const supabaseFetch = async (path: string, options: RequestInit = {}) => {
+  const accessToken = getAuthToken();
+  const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+      'Authorization': `Bearer ${accessToken}`,
+      'Prefer': 'return=representation',
+      ...options.headers,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || JSON.stringify(data));
+  }
+
+  return data;
+};
+
 export function MarketProvider({ children }: { children: ReactNode }) {
   const [markets, setMarkets] = useState<Market[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -376,41 +412,10 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       console.log('DB market without ID:', dbMarketWithoutId);
 
       console.log('Inserting market into database...');
-
-      // Try direct fetch as workaround for hanging Supabase client
-      console.log('Using direct fetch to Supabase REST API...');
-      const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
-      let accessToken = null;
-      if (authToken) {
-        try {
-          const parsed = JSON.parse(authToken);
-          accessToken = parsed.access_token;
-          console.log('Access token found:', accessToken ? 'exists' : 'missing');
-        } catch (e) {
-          console.error('Failed to parse auth token:', e);
-        }
-      }
-
-      const response = await fetch('https://drlnhierscrldlijdhdo.supabase.co/rest/v1/markets', {
+      const responseData = await supabaseFetch('/markets', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
-          'Authorization': `Bearer ${accessToken}`,
-          'Prefer': 'return=representation'
-        },
         body: JSON.stringify(dbMarketWithoutId)
       });
-
-      console.log('Fetch response status:', response.status);
-      const responseData = await response.json();
-      console.log('Fetch response data:', responseData);
-
-      if (!response.ok) {
-        const error = responseData;
-        console.error('Fetch error:', error);
-        throw new Error(`Failed to add market: ${error.message || JSON.stringify(error)}`);
-      }
 
       const data = Array.isArray(responseData) ? responseData[0] : responseData;
 
@@ -435,18 +440,13 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       if (!currentUserId) return;
 
       const dbMarket = convertMarketToDb(updatedMarket, currentUserId);
-      const { error } = await supabase
-        .from('markets')
-        .update(dbMarket)
-        .eq('id', updatedMarket.id);
-
-      if (error) {
-        console.error('Error updating market:', error);
-        return;
-      }
+      await supabaseFetch(`/markets?id=eq.${updatedMarket.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(dbMarket)
+      });
 
       // Update local state
-      setMarkets(prev => prev.map(market => 
+      setMarkets(prev => prev.map(market =>
         market.id === updatedMarket.id ? updatedMarket : market
       ));
     } catch (error) {

@@ -17,12 +17,12 @@ export function LocationTicker() {
     // Get user's location from IP
     const fetchLocation = async () => {
       try {
-        const response = await fetch('https://ipapi.co/json/');
+        const response = await fetch('http://ip-api.com/json');
         const data = await response.json();
         setLocation({
           timezone: data.timezone || 'UTC',
           city: data.city || 'Unknown',
-          country: data.region_code || data.country_code || 'Unknown'
+          country: data.countryCode || 'Unknown'
         });
       } catch (error) {
         // Fallback to UTC if IP geolocation fails
