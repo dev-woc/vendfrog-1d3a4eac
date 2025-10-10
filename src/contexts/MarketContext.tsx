@@ -264,12 +264,6 @@ export function MarketProvider({ children }: { children: ReactNode }) {
           const convertedMarkets = dbMarkets.map(convertDbToMarket);
           console.log('Loaded markets from database:', convertedMarkets);
           setMarkets(convertedMarkets);
-          
-          // If user has only one market, add some sample data to showcase the functionality
-          if (dbMarkets.length <= 1) {
-            console.log('User has limited markets, adding sample data for demo');
-            await addSampleData(user.id);
-          }
         } else {
           // New user - add some sample data
           console.log('New user detected, adding sample data');
@@ -394,41 +388,22 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
   const addMarket = async (market: Market) => {
     try {
-      console.log('addMarket called with:', market);
-      console.log('Current user ID from state:', currentUserId);
-
       if (!currentUserId) {
-        console.error('No user ID in state - user not logged in');
         throw new Error('You must be logged in to add a market');
       }
 
-      console.log('User found:', currentUserId);
-      console.log('Converting market to DB format...');
       const dbMarket = convertMarketToDb(market, currentUserId);
-      console.log('DB market object:', dbMarket);
-
-      // Remove id to let database auto-generate UUID
       const { id, ...dbMarketWithoutId } = dbMarket;
-      console.log('DB market without ID:', dbMarketWithoutId);
 
-      console.log('Inserting market into database...');
       const responseData = await supabaseFetch('/markets', {
         method: 'POST',
         body: JSON.stringify(dbMarketWithoutId)
       });
 
       const data = Array.isArray(responseData) ? responseData[0] : responseData;
-
-      console.log('Market added successfully to database:', data);
-      // Convert the database result back to Market format and add to local state
       const newMarket = convertDbToMarket(data);
-      console.log('Converted market for local state:', newMarket);
-      setMarkets(prev => {
-        console.log('Updating local markets state, prev length:', prev.length);
-        const updated = [newMarket, ...prev];
-        console.log('New markets state length:', updated.length);
-        return updated;
-      });
+
+      setMarkets(prev => [newMarket, ...prev]);
     } catch (error) {
       console.error('Unexpected error in addMarket:', error);
       throw error;
