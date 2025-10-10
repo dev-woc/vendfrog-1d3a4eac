@@ -196,7 +196,27 @@ export function useDocuments() {
   };
 
   useEffect(() => {
-    fetchDocuments();
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Documents hook - Auth state changed:', event, session?.user?.id);
+        if (session?.user) {
+          fetchDocuments();
+        } else {
+          setDocuments([]);
+          setLoading(false);
+        }
+      }
+    );
+
+    // Also fetch on initial mount if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        fetchDocuments();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return {
