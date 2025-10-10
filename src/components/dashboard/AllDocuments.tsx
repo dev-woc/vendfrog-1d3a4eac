@@ -166,11 +166,14 @@ export function AllDocuments({ showUpload = true }: AllDocumentsProps) {
               <p className="text-xs text-muted-foreground mt-1 px-2">
                 Insurance documents, permits, certifications (PDF, JPG, PNG)
               </p>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="mt-4 min-h-[44px]" 
-                onClick={triggerFileSelect}
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 min-h-[44px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  triggerFileSelect();
+                }}
                 disabled={uploading}
               >
                 {uploading ? "Uploading..." : "Browse Files"}
