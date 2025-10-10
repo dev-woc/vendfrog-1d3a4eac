@@ -14,15 +14,14 @@ export function LocationTicker() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get user's location from IP
     const fetchLocation = async () => {
       try {
-        const response = await fetch('https://ip-api.com/json');
+        const response = await fetch('https://freegeoip.app/json/');
         const data = await response.json();
         setLocation({
-          timezone: data.timezone || 'UTC',
+          timezone: data.time_zone || 'UTC',
           city: data.city || 'Unknown',
-          country: data.countryCode || 'Unknown'
+          country: data.country_code || 'Unknown'
         });
       } catch (error) {
         // Fallback to UTC if IP geolocation fails
