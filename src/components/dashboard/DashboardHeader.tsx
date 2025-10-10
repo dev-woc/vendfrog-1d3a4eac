@@ -164,29 +164,26 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
               >
                 <button
                   className="w-full flex items-center"
-                  onClick={async () => {
+                  onClick={() => {
                     console.log('Logout clicked');
-                    try {
-                      // Clear local storage
-                      localStorage.removeItem('vendfrog_email');
-                      localStorage.removeItem('vendfrog_password');
 
-                      // Sign out from Supabase
-                      const { error } = await supabase.auth.signOut();
-                      console.log('SignOut result:', { error });
+                    // Clear local storage immediately
+                    localStorage.removeItem('vendfrog_email');
+                    localStorage.removeItem('vendfrog_password');
+                    console.log('Cleared local storage');
 
-                      if (error) {
-                        console.error('Logout error:', error);
-                      }
+                    // Sign out from Supabase (don't wait for it)
+                    supabase.auth.signOut()
+                      .then(({ error }) => {
+                        console.log('SignOut result:', { error });
+                      })
+                      .catch((err) => {
+                        console.error('Logout exception:', err);
+                      });
 
-                      // Force redirect regardless of error
-                      console.log('Redirecting to /auth');
-                      window.location.href = '/auth';
-                    } catch (err) {
-                      console.error('Logout exception:', err);
-                      // Force redirect even on error
-                      window.location.href = '/auth';
-                    }
+                    // Immediate redirect
+                    console.log('Redirecting to /auth');
+                    window.location.href = '/auth';
                   }}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
