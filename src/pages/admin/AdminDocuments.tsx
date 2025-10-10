@@ -28,16 +28,26 @@ const getAuthToken = () => {
   return null;
 };
 
-const supabaseFetch = async (path: string) => {
+const supabaseFetch = async (path: string, options: RequestInit = {}) => {
   const accessToken = getAuthToken();
   const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1${path}`, {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
       'Authorization': `Bearer ${accessToken}`,
+      'Prefer': 'return=representation',
+      ...options.headers,
     },
   });
-  return response.json();
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || JSON.stringify(data));
+  }
+
+  return data;
 };
 
 interface Document {
@@ -60,9 +70,13 @@ export default function AdminDocuments() {
 
   const loadDocuments = async () => {
     try {
-      const documents = await supabaseFetch('/documents?select=*&order=created_at.desc');
-      if (documents) {
+      const documents = await supabaseFetch('/documents?order=created_at.desc', {
+        method: 'GET'
+      });
+      if (documents && documents.length > 0) {
         setDocuments(documents as Document[]);
+      } else {
+        setDocuments([]);
       }
     } catch (error) {
       console.error('Error loading documents:', error);
