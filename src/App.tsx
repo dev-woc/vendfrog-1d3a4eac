@@ -14,6 +14,10 @@ import Finance from "./pages/Finance";
 import Auth from "./pages/Auth";
 import Help from "./pages/Help";
 import NotFound from "./pages/NotFound";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminMarkets from "./pages/admin/AdminMarkets";
+import AdminDocuments from "./pages/admin/AdminDocuments";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +39,10 @@ const App = () => (
                   <Route path="/finance" element={<Finance />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/help" element={<Help />} />
+                  <Route path="/admin" element={<AdminDashboard />} />
+                  <Route path="/admin/users" element={<AdminUsers />} />
+                  <Route path="/admin/markets" element={<AdminMarkets />} />
+                  <Route path="/admin/documents" element={<AdminDocuments />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
