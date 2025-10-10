@@ -356,17 +356,17 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.error('No user found when adding market');
-        return;
+        throw new Error('You must be logged in to add a market');
       }
 
       console.log('User found, converting market to DB format...');
       const dbMarket = convertMarketToDb(market, user.id);
       console.log('DB market object:', dbMarket);
-      
+
       // Remove id to let database auto-generate UUID
       const { id, ...dbMarketWithoutId } = dbMarket;
       console.log('DB market without ID:', dbMarketWithoutId);
-      
+
       console.log('Inserting market into database...');
       const { data, error } = await supabase
         .from('markets')
@@ -377,7 +377,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Database error adding market:', error);
         console.error('Error details:', JSON.stringify(error, null, 2));
-        return;
+        throw new Error(`Failed to add market: ${error.message}`);
       }
 
       console.log('Market added successfully to database:', data);
@@ -392,7 +392,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       });
     } catch (error) {
       console.error('Unexpected error in addMarket:', error);
-      console.error('Error stack:', error.stack);
+      throw error;
     }
   };
 

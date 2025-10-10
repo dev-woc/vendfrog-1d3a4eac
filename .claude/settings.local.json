@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT id, name, status, date, user_id FROM markets ORDER BY created_at DESC LIMIT 5;\")",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT id, email FROM auth.users;\")",
+      "Bash(SUPABASE_ACCESS_TOKEN=sbp_afd1a59d66de5e37453efbd85de7a8444b989e42 psql \"postgresql://postgres:bigjaymustay32@db.drlnhierscrldlijdhdo.supabase.co:5432/postgres\" -c \"SELECT COUNT(*) as total_markets FROM markets;\")"
     ],
     "deny": [],
     "ask": []

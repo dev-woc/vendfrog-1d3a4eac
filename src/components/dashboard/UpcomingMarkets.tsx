@@ -5,18 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useMarkets } from "@/contexts/MarketContext";
+import { useToast } from "@/hooks/use-toast";
 import { MarketDetailsModal } from "./MarketDetailsModal";
 import { ChecklistModal } from "./ChecklistModal";
 import { AddMarketModal } from "./AddMarketModal";
 import { CloseMarketModal } from "./CloseMarketModal";
 import { Market } from "@/types/market";
-import { 
-  MapPin, 
-  DollarSign, 
-  CheckSquare, 
+import {
+  MapPin,
+  DollarSign,
+  CheckSquare,
   Calendar,
-  Edit, 
-  Eye, 
+  Edit,
+  Eye,
   Archive,
   Clock
 } from "lucide-react";
@@ -202,6 +203,7 @@ function PastMarketCard({ market }: { market: Market }) {
 
 export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
   const { getUpcomingMarkets, getPastMarkets, updateMarketChecklist, updateMarket, closeMarket, addMarket, addChecklistItem } = useMarkets();
+  const { toast } = useToast();
   const [selectedMarket, setSelectedMarket] = useState<Market | null>(null);
   const [checklistMarket, setChecklistMarket] = useState<Market | null>(null);
   const [editingMarket, setEditingMarket] = useState<Market | null>(null);
@@ -359,8 +361,16 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
           open={isAddModalOpen}
           onOpenChange={setIsAddModalOpen}
           onAddMarket={async (market) => {
-            await addMarket(market);
-            setIsAddModalOpen(false);
+            try {
+              await addMarket(market);
+              setIsAddModalOpen(false);
+            } catch (error: any) {
+              toast({
+                title: "Error",
+                description: error.message || "Failed to add market",
+                variant: "destructive"
+              });
+            }
           }}
         />
       </Card>
@@ -475,9 +485,17 @@ export function UpcomingMarkets({ showAll = false }: { showAll?: boolean }) {
       <AddMarketModal
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
-        onAddMarket={(market) => {
-          addMarket(market);
-          setIsAddModalOpen(false);
+        onAddMarket={async (market) => {
+          try {
+            await addMarket(market);
+            setIsAddModalOpen(false);
+          } catch (error: any) {
+            toast({
+              title: "Error",
+              description: error.message || "Failed to add market",
+              variant: "destructive"
+            });
+          }
         }}
       />
 
