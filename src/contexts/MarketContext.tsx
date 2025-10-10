@@ -182,26 +182,21 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     const market = markets.find(m => m.id === marketId);
     if (!market) return;
 
-    const updatedChecklist = market.checklist.map(item => 
-      item.id === checklistItemId 
+    const updatedChecklist = market.checklist.map(item =>
+      item.id === checklistItemId
         ? { ...item, completed: !item.completed }
         : item
     );
 
     // Update in database
-    const { error } = await supabase
-      .from('markets')
-      .update({ checklist: updatedChecklist })
-      .eq('id', marketId);
-
-    if (error) {
-      console.error('Error updating checklist:', error);
-      return;
-    }
+    await supabaseFetch(`/markets?id=eq.${marketId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ checklist: updatedChecklist })
+    });
 
     // Update local state
-    setMarkets(prev => prev.map(m => 
-      m.id === marketId 
+    setMarkets(prev => prev.map(m =>
+      m.id === marketId
         ? { ...m, checklist: updatedChecklist }
         : m
     ));
@@ -214,19 +209,14 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     const updatedChecklist = [...market.checklist, newItem];
 
     // Update in database
-    const { error } = await supabase
-      .from('markets')
-      .update({ checklist: updatedChecklist })
-      .eq('id', marketId);
-
-    if (error) {
-      console.error('Error adding checklist item:', error);
-      return;
-    }
+    await supabaseFetch(`/markets?id=eq.${marketId}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ checklist: updatedChecklist })
+    });
 
     // Update local state
-    setMarkets(prev => prev.map(m => 
-      m.id === marketId 
+    setMarkets(prev => prev.map(m =>
+      m.id === marketId
         ? { ...m, checklist: updatedChecklist }
         : m
     ));
@@ -279,26 +269,21 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const closeMarket = async (marketId: string, actualRevenue: number) => {
     try {
       const completedDate = new Date().toISOString().split('T')[0];
-      const { error } = await supabase
-        .from('markets')
-        .update({ 
+      await supabaseFetch(`/markets?id=eq.${marketId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({
           status: 'completed',
           actual_revenue: actualRevenue,
           completed: true,
           completed_date: completedDate
         })
-        .eq('id', marketId);
-
-      if (error) {
-        console.error('Error closing market:', error);
-        return;
-      }
+      });
 
       // Update local state
-      setMarkets(prev => prev.map(market => 
-        market.id === marketId 
-          ? { 
-              ...market, 
+      setMarkets(prev => prev.map(market =>
+        market.id === marketId
+          ? {
+              ...market,
               status: "completed" as const,
               actualRevenue,
               completed: true,

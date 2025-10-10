@@ -2,6 +2,63 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
+// Helper to get auth token
+const getAuthToken = () => {
+  const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+  if (authToken) {
+    try {
+      const parsed = JSON.parse(authToken);
+      return parsed.access_token;
+    } catch (e) {
+      console.error('Failed to parse auth token:', e);
+    }
+  }
+  return null;
+};
+
+// Helper for database operations
+const supabaseFetch = async (path: string, options: RequestInit = {}) => {
+  const accessToken = getAuthToken();
+  const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+      'Authorization': `Bearer ${accessToken}`,
+      'Prefer': 'return=representation',
+      ...options.headers,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || JSON.stringify(data));
+  }
+
+  return data;
+};
+
+// Helper for storage operations
+const supabaseStorageFetch = async (path: string, options: RequestInit = {}) => {
+  const accessToken = getAuthToken();
+  const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/storage/v1${path}`, {
+    ...options,
+    headers: {
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+      'Authorization': `Bearer ${accessToken}`,
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || JSON.stringify(error));
+  }
+
+  return response;
+};
+
 export interface Document {
   id: string;
   file_name: string;
@@ -56,8 +113,20 @@ export function useDocuments() {
   const uploadFiles = async (files: FileList, documentType: string = 'other') => {
     try {
       console.log('Starting file upload for:', files.length, 'files');
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
+
+      // Get user ID from localStorage
+      const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+      let userId = null;
+      if (authToken) {
+        try {
+          const parsed = JSON.parse(authToken);
+          userId = parsed.user?.id;
+        } catch (e) {
+          console.error('Failed to parse auth token:', e);
+        }
+      }
+
+      if (!userId) {
         console.error('No user found for upload');
         toast({
           title: "Error",
@@ -67,32 +136,29 @@ export function useDocuments() {
         return;
       }
 
-      console.log('User authenticated for upload:', user.id);
+      console.log('User authenticated for upload:', userId);
 
       const uploadPromises = Array.from(files).map(async (file, index) => {
         console.log(`Uploading file ${index + 1}:`, file.name, 'size:', file.size, 'type:', file.type);
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${user.id}/${Date.now()}-${file.name}`;
-        
-        console.log('Storage path:', fileName);
-        
-        // Upload to storage
-        console.log('About to upload to storage...');
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('documents')
-          .upload(fileName, file);
+        const fileName = `${userId}/${Date.now()}-${file.name}`;
 
-        console.log('Storage upload result:', { uploadData, uploadError });
-        if (uploadError) {
-          console.error('Storage upload error:', uploadError);
-          throw uploadError;
-        }
+        console.log('Storage path:', fileName);
+
+        // Upload to storage using fetch
+        console.log('About to upload to storage...');
+        await supabaseStorageFetch(`/object/documents/${fileName}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': file.type || 'application/octet-stream',
+          },
+          body: file
+        });
 
         console.log('File uploaded to storage successfully, saving to database...');
 
         // Save to database
         const documentData = {
-          user_id: user.id,
+          user_id: userId,
           file_name: file.name,
           file_size: file.size,
           file_type: file.type || 'application/octet-stream',
@@ -101,16 +167,10 @@ export function useDocuments() {
         };
         console.log('Inserting document data:', documentData);
 
-        const { data: dbData, error: dbError } = await supabase
-          .from('documents')
-          .insert(documentData)
-          .select();
-
-        console.log('Database insert result:', { dbData, dbError });
-        if (dbError) {
-          console.error('Database insert error:', dbError);
-          throw dbError;
-        }
+        const dbData = await supabaseFetch('/documents', {
+          method: 'POST',
+          body: JSON.stringify(documentData)
+        });
 
         console.log('File saved to database successfully:', dbData);
       });
@@ -139,13 +199,12 @@ export function useDocuments() {
 
   const downloadDocument = async (document: Document) => {
     try {
-      const { data, error } = await supabase.storage
-        .from('documents')
-        .download(document.storage_path);
+      const response = await supabaseStorageFetch(`/object/documents/${document.storage_path}`, {
+        method: 'GET'
+      });
 
-      if (error) throw error;
-
-      const url = URL.createObjectURL(data);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
       const link = window.document.createElement('a');
       link.href = url;
       link.download = document.file_name;
@@ -166,19 +225,14 @@ export function useDocuments() {
   const deleteDocument = async (documentId: string, storagePath: string) => {
     try {
       // Delete from storage
-      const { error: storageError } = await supabase.storage
-        .from('documents')
-        .remove([storagePath]);
-
-      if (storageError) throw storageError;
+      await supabaseStorageFetch(`/object/documents/${storagePath}`, {
+        method: 'DELETE'
+      });
 
       // Delete from database
-      const { error: dbError } = await supabase
-        .from('documents')
-        .delete()
-        .eq('id', documentId);
-
-      if (dbError) throw dbError;
+      await supabaseFetch(`/documents?id=eq.${documentId}`, {
+        method: 'DELETE'
+      });
 
       toast({
         title: "Success",
