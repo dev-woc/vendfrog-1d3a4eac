@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle } from "lucide-react";
+import { LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
@@ -15,7 +15,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
   const { setTheme, theme } = useTheme();
-  const [userProfile, setUserProfile] = useState<{ full_name: string; } | null>(null);
+  const [userProfile, setUserProfile] = useState<{ full_name: string; is_admin?: boolean; } | null>(null);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -37,9 +37,9 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
 
         console.log('Fetching profile for user:', userId);
 
-        // Fetch profile using direct REST API
+        // Fetch profile using direct REST API (including is_admin flag)
         const accessToken = authToken ? JSON.parse(authToken).access_token : null;
-        const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1/profiles?user_id=eq.${userId}&select=full_name,company_name,phone_number`, {
+        const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1/profiles?user_id=eq.${userId}&select=full_name,company_name,phone_number,is_admin`, {
           headers: {
             'Content-Type': 'application/json',
             'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
@@ -89,33 +89,45 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
           </Link>
           
           <nav className="hidden md:flex items-center space-x-3 lg:space-x-4">
-            <Link 
-              to="/markets" 
+            <Link
+              to="/markets"
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Markets
             </Link>
             <span className="text-muted-foreground text-xs">|</span>
-            <Link 
-              to="/documents" 
+            <Link
+              to="/documents"
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Documents
             </Link>
             <span className="text-muted-foreground text-xs">|</span>
-            <Link 
-              to="/finance" 
+            <Link
+              to="/finance"
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Finance
             </Link>
             <span className="text-muted-foreground text-xs">|</span>
-            <Link 
-              to="/help" 
+            <Link
+              to="/help"
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Help
             </Link>
+            {userProfile?.is_admin && (
+              <>
+                <span className="text-muted-foreground text-xs">|</span>
+                <Link
+                  to="/admin"
+                  className="text-xs sm:text-sm font-medium text-amber-600 hover:text-amber-500 transition-colors flex items-center gap-1"
+                >
+                  <Shield className="h-3 w-3" />
+                  Admin
+                </Link>
+              </>
+            )}
           </nav>
           
           <div className="hidden xl:block text-xs sm:text-sm text-muted-foreground">
@@ -174,6 +186,14 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                   <span>Help & Support</span>
                 </Link>
               </DropdownMenuItem>
+              {userProfile?.is_admin && (
+                <DropdownMenuItem asChild>
+                  <Link to="/admin" className="flex items-center text-amber-600">
+                    <Shield className="mr-2 h-4 w-4" />
+                    <span>Admin Dashboard</span>
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem
                 onSelect={(e) => {
                   e.preventDefault();
