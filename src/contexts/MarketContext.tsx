@@ -377,29 +377,42 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
       console.log('Inserting market into database...');
 
-      // Add timeout wrapper for insert
-      const insertPromise = supabase
-        .from('markets')
-        .insert([dbMarketWithoutId])
-        .select()
-        .single();
-
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Insert timeout after 10s')), 10000)
-      );
-
-      const { data, error } = await Promise.race([
-        insertPromise,
-        timeoutPromise
-      ]) as any;
-
-      console.log('Insert completed, result:', { data, error });
-
-      if (error) {
-        console.error('Database error adding market:', error);
-        console.error('Error details:', JSON.stringify(error, null, 2));
-        throw new Error(`Failed to add market: ${error.message}`);
+      // Try direct fetch as workaround for hanging Supabase client
+      console.log('Using direct fetch to Supabase REST API...');
+      const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+      let accessToken = null;
+      if (authToken) {
+        try {
+          const parsed = JSON.parse(authToken);
+          accessToken = parsed.access_token;
+          console.log('Access token found:', accessToken ? 'exists' : 'missing');
+        } catch (e) {
+          console.error('Failed to parse auth token:', e);
+        }
       }
+
+      const response = await fetch('https://drlnhierscrldlijdhdo.supabase.co/rest/v1/markets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(dbMarketWithoutId)
+      });
+
+      console.log('Fetch response status:', response.status);
+      const responseData = await response.json();
+      console.log('Fetch response data:', responseData);
+
+      if (!response.ok) {
+        const error = responseData;
+        console.error('Fetch error:', error);
+        throw new Error(`Failed to add market: ${error.message || JSON.stringify(error)}`);
+      }
+
+      const data = Array.isArray(responseData) ? responseData[0] : responseData;
 
       console.log('Market added successfully to database:', data);
       // Convert the database result back to Market format and add to local state
