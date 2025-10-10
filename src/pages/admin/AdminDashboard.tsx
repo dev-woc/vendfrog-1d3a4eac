@@ -5,6 +5,42 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, Calendar, FileText, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+// Helper to get auth token
+const getAuthToken = () => {
+  const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+  if (authToken) {
+    try {
+      const parsed = JSON.parse(authToken);
+      return { userId: parsed.user?.id, accessToken: parsed.access_token };
+    } catch (e) {
+      console.error('Failed to parse auth token:', e);
+    }
+  }
+  return { userId: null, accessToken: null };
+};
+
+const supabaseFetch = async (path: string, options: RequestInit = {}) => {
+  const { accessToken } = getAuthToken();
+  const response = await fetch(`https://drlnhierscrldlijdhdo.supabase.co/rest/v1${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+      'Authorization': `Bearer ${accessToken}`,
+      'Prefer': options.headers?.['Prefer'] || 'return=representation',
+      ...options.headers,
+    },
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.message || JSON.stringify(data));
+  }
+
+  return data;
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
@@ -21,18 +57,15 @@ export default function AdminDashboard() {
   }, []);
 
   const checkAdminAccess = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { userId } = getAuthToken();
 
-    if (!user) {
+    if (!userId) {
       navigate('/auth');
       return;
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('is_admin')
-      .eq('user_id', user.id)
-      .single();
+    const profiles = await supabaseFetch(`/profiles?user_id=eq.${userId}&select=is_admin`);
+    const profile = profiles?.[0];
 
     if (!profile?.is_admin) {
       navigate('/dashboard');
@@ -43,40 +76,62 @@ export default function AdminDashboard() {
   };
 
   const loadStats = async () => {
-    // Get total users
-    const { count: usersCount } = await supabase
-      .from('profiles')
-      .select('*', { count: 'exact', head: true });
+    try {
+      const { accessToken } = getAuthToken();
 
-    // Get total markets
-    const { count: marketsCount } = await supabase
-      .from('markets')
-      .select('*', { count: 'exact', head: true });
+      // Get total users count
+      const usersResponse = await fetch('https://drlnhierscrldlijdhdo.supabase.co/rest/v1/profiles?select=count', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'count=exact'
+        }
+      });
+      const usersCount = parseInt(usersResponse.headers.get('Content-Range')?.split('/')[1] || '0');
 
-    // Get total documents
-    const { count: documentsCount } = await supabase
-      .from('documents')
-      .select('*', { count: 'exact', head: true });
+      // Get total markets count
+      const marketsResponse = await fetch('https://drlnhierscrldlijdhdo.supabase.co/rest/v1/markets?select=count', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'count=exact'
+        }
+      });
+      const marketsCount = parseInt(marketsResponse.headers.get('Content-Range')?.split('/')[1] || '0');
 
-    // Get total revenue
-    const { data: markets } = await supabase
-      .from('markets')
-      .select('actual_revenue')
-      .not('actual_revenue', 'is', null);
+      // Get total documents count
+      const documentsResponse = await fetch('https://drlnhierscrldlijdhdo.supabase.co/rest/v1/documents?select=count', {
+        headers: {
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRybG5oaWVyc2NybGRsaWpkaGRvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMzcyMTYsImV4cCI6MjA3NTYxMzIxNn0.7AEGX00cJChyldsTw08wSmrjjI2Q1dH_lP_rS-5vbPg',
+          'Authorization': `Bearer ${accessToken}`,
+          'Prefer': 'count=exact'
+        }
+      });
+      const documentsCount = parseInt(documentsResponse.headers.get('Content-Range')?.split('/')[1] || '0');
 
-    const totalRevenue = markets?.reduce((sum, m) => sum + (parseFloat(m.actual_revenue) || 0), 0) || 0;
+      // Get total revenue
+      const markets = await supabaseFetch('/markets?select=actual_revenue&actual_revenue=not.is.null');
+      const totalRevenue = markets?.reduce((sum: number, m: any) => sum + (parseFloat(m.actual_revenue) || 0), 0) || 0;
 
-    setStats({
-      totalUsers: usersCount || 0,
-      totalMarkets: marketsCount || 0,
-      totalDocuments: documentsCount || 0,
-      totalRevenue
-    });
+      setStats({
+        totalUsers: usersCount || 0,
+        totalMarkets: marketsCount || 0,
+        totalDocuments: documentsCount || 0,
+        totalRevenue
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/auth');
+    // Clear auth from localStorage
+    localStorage.removeItem('sb-drlnhierscrldlijdhdo-auth-token');
+    localStorage.removeItem('vendfrog_email');
+    localStorage.removeItem('vendfrog_password');
+
+    // Redirect to auth
+    window.location.href = '/auth';
   };
 
   if (isAdmin === null) {
