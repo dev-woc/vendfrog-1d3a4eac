@@ -16,12 +16,23 @@ export function LocationTicker() {
   useEffect(() => {
     const fetchLocation = async () => {
       try {
-        const response = await fetch('https://api.ipbase.com/v1/json/');
+        const response = await fetch('https://ipapi.co/json/');
+        if (response.status === 429) {
+          console.warn('Rate limited by ipapi.co. Please try again later.');
+          // Fallback to UTC
+          setLocation({
+            timezone: 'UTC',
+            city: 'UTC',
+            country: 'UTC'
+          });
+          setLoading(false);
+          return;
+        }
         const data = await response.json();
         setLocation({
-          timezone: data.time_zone || 'UTC',
+          timezone: data.timezone || 'UTC',
           city: data.city || 'Unknown',
-          country: data.country_code || 'Unknown'
+          country: data.region_code || data.country_code || 'Unknown'
         });
       } catch (error) {
         // Fallback to UTC if IP geolocation fails
