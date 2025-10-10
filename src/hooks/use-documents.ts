@@ -103,7 +103,8 @@ export function useDocuments() {
 
         const { data: dbData, error: dbError } = await supabase
           .from('documents')
-          .insert(documentData);
+          .insert(documentData)
+          .select();
 
         console.log('Database insert result:', { dbData, dbError });
         if (dbError) {
@@ -111,7 +112,7 @@ export function useDocuments() {
           throw dbError;
         }
 
-        console.log('File saved to database successfully');
+        console.log('File saved to database successfully:', dbData);
       });
 
       await Promise.all(uploadPromises);
