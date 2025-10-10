@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
 import { Link } from "react-router-dom";
-import { LocationTicker } from "@/components/ui/LocationTicker";
+// import { LocationTicker } from "@/components/ui/LocationTicker";
 import { AlertsDropdown } from "@/components/dashboard/AlertsDropdown";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -107,7 +107,7 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
         
         <div className="flex items-center space-x-2 sm:space-x-4">
           <div className="hidden lg:block">
-            <LocationTicker />
+            {/* <LocationTicker /> */}
           </div>
           
           <AlertsDropdown />
