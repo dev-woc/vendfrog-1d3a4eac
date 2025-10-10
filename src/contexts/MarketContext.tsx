@@ -354,9 +354,15 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     try {
       console.log('addMarket called with:', market);
 
-      // Check localStorage first
-      const authStorage = localStorage.getItem('supabase.auth.token');
-      console.log('Auth storage in localStorage:', authStorage ? 'exists' : 'missing');
+      // Check all localStorage keys for debugging
+      const allKeys = Object.keys(localStorage);
+      console.log('All localStorage keys:', allKeys);
+      const supabaseKeys = allKeys.filter(k => k.includes('supabase') || k.includes('sb-'));
+      console.log('Supabase-related keys:', supabaseKeys);
+      supabaseKeys.forEach(key => {
+        const value = localStorage.getItem(key);
+        console.log(`${key}:`, value ? value.substring(0, 100) + '...' : 'null');
+      });
 
       console.log('About to call supabase.auth.getSession()...');
 
