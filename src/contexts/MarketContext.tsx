@@ -353,13 +353,22 @@ export function MarketProvider({ children }: { children: ReactNode }) {
   const addMarket = async (market: Market) => {
     try {
       console.log('addMarket called with:', market);
-      const { data: { user } } = await supabase.auth.getUser();
+      console.log('About to call supabase.auth.getUser()...');
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      console.log('getUser result:', { user, authError });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw new Error(`Authentication error: ${authError.message}`);
+      }
+
       if (!user) {
         console.error('No user found when adding market');
         throw new Error('You must be logged in to add a market');
       }
 
-      console.log('User found, converting market to DB format...');
+      console.log('User found:', user.id);
+      console.log('Converting market to DB format...');
       const dbMarket = convertMarketToDb(market, user.id);
       console.log('DB market object:', dbMarket);
 
