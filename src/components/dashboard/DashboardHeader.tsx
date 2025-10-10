@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
-import { Bell, LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle } from "lucide-react";
+import { LogOut, Moon, Sun, Calendar, FileText, DollarSign, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useTheme } from "next-themes";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { LocationTicker } from "@/components/ui/LocationTicker";
 import { AlertsDropdown } from "@/components/dashboard/AlertsDropdown";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 interface DashboardHeaderProps {
   vendorName?: string;
@@ -16,10 +15,7 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
   const { setTheme, theme } = useTheme();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const [userProfile, setUserProfile] = useState<{ full_name: string; } | null>(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -42,8 +38,6 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
         }
       } catch (error) {
         console.error('Error fetching user profile:', error);
-      } finally {
-        setLoading(false);
       }
     };
 
