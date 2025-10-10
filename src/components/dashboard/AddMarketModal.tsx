@@ -208,7 +208,12 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         };
         console.log('New market object:', newMarket);
         console.log('Calling onAddMarket...');
-        await onAddMarket?.(newMarket);
+
+        if (!onAddMarket) {
+          throw new Error('onAddMarket handler not provided');
+        }
+
+        await onAddMarket(newMarket);
         console.log('onAddMarket completed successfully');
       }
 
