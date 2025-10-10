@@ -124,7 +124,7 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
       try {
         console.log('Loading markets for user:', user.id);
-        const dbMarkets = await supabaseFetch(`/markets?user_id=eq.${user.id}&order=date.asc`, {
+        const dbMarkets = await supabaseFetch(`/markets?user_id=eq.${user.id}&order=date.desc`, {
           method: 'GET'
         });
 
