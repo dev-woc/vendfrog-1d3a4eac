@@ -26,6 +26,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     date: undefined as Date | undefined,
@@ -279,7 +280,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
 
           <div>
             <Label>Event Date</Label>
-            <Popover>
+            <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -296,7 +297,10 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 <Calendar
                   mode="single"
                   selected={formData.date}
-                  onSelect={(date) => handleFormChange({ ...formData, date })}
+                  onSelect={(date) => {
+                    handleFormChange({ ...formData, date });
+                    setIsCalendarOpen(false);
+                  }}
                   initialFocus
                 />
               </PopoverContent>
