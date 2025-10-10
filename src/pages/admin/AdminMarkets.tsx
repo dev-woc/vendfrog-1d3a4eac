@@ -61,7 +61,9 @@ export default function AdminMarkets() {
 
   const loadMarkets = async () => {
     try {
+      console.log('Loading markets...');
       const markets = await supabaseFetch('/markets?select=*&order=date.desc');
+      console.log('Markets loaded:', markets);
       if (markets) {
         setMarkets(markets as Market[]);
       }
