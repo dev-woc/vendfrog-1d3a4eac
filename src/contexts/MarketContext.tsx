@@ -124,17 +124,9 @@ export function MarketProvider({ children }: { children: ReactNode }) {
 
       try {
         console.log('Loading markets for user:', user.id);
-        const { data: dbMarkets, error } = await supabase
-          .from('markets')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('date', { ascending: true });
-
-        if (error) {
-          console.error('Error loading markets:', error);
-          setIsLoading(false);
-          return;
-        }
+        const dbMarkets = await supabaseFetch(`/markets?user_id=eq.${user.id}&order=date.asc`, {
+          method: 'GET'
+        });
 
         if (dbMarkets && dbMarkets.length > 0) {
           const convertedMarkets = dbMarkets.map(convertDbToMarket);
@@ -166,12 +158,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
     );
 
     // Also check current user on mount
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        setCurrentUserId(user.id);
+    const authToken = localStorage.getItem('sb-drlnhierscrldlijdhdo-auth-token');
+    if (authToken) {
+      try {
+        const parsed = JSON.parse(authToken);
+        const user = parsed.user;
+        if (user?.id) {
+          setCurrentUserId(user.id);
+          loadMarkets(user);
+        } else {
+          setIsLoading(false);
+        }
+      } catch (e) {
+        console.error('Failed to parse auth token on mount:', e);
+        setIsLoading(false);
       }
-      loadMarkets(user);
-    });
+    } else {
+      setIsLoading(false);
+    }
 
     return () => subscription.unsubscribe();
   }, []);
