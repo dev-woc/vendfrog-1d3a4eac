@@ -376,11 +376,24 @@ export function MarketProvider({ children }: { children: ReactNode }) {
       console.log('DB market without ID:', dbMarketWithoutId);
 
       console.log('Inserting market into database...');
-      const { data, error } = await supabase
+
+      // Add timeout wrapper for insert
+      const insertPromise = supabase
         .from('markets')
         .insert([dbMarketWithoutId])
         .select()
         .single();
+
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Insert timeout after 10s')), 10000)
+      );
+
+      const { data, error } = await Promise.race([
+        insertPromise,
+        timeoutPromise
+      ]) as any;
+
+      console.log('Insert completed, result:', { data, error });
 
       if (error) {
         console.error('Database error adding market:', error);
