@@ -31,15 +31,11 @@ const Auth = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
 
   useEffect(() => {
-    // Load remembered credentials
+    // Load remembered email only (not password for security)
     const savedEmail = localStorage.getItem('vendfrog_email');
-    const savedPassword = localStorage.getItem('vendfrog_password');
     if (savedEmail) {
       setLoginEmail(savedEmail);
       setRememberMe(true);
-    }
-    if (savedPassword) {
-      setLoginPassword(savedPassword);
     }
 
     // Set up auth state listener FIRST
@@ -113,14 +109,14 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
-        // Save credentials if remember me is checked
+        // Save email only if remember me is checked (not password for security)
         if (rememberMe) {
           localStorage.setItem('vendfrog_email', loginEmail);
-          localStorage.setItem('vendfrog_password', loginPassword);
         } else {
           localStorage.removeItem('vendfrog_email');
-          localStorage.removeItem('vendfrog_password');
         }
+        // Always remove password from localStorage
+        localStorage.removeItem('vendfrog_password');
 
         toast({
           title: "Success",
@@ -285,7 +281,7 @@ const Auth = () => {
                     onCheckedChange={(checked) => setRememberMe(checked === true)}
                   />
                   <Label htmlFor="remember" className="text-sm">
-                    Remember email and password
+                    Remember email
                   </Label>
                 </div>
 

@@ -202,7 +202,7 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
               >
                 <button
                   className="w-full flex items-center"
-                  onClick={() => {
+                  onClick={async () => {
                     console.log('Logout clicked');
 
                     // Clear local storage immediately
@@ -210,16 +210,19 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                     localStorage.removeItem('vendfrog_password');
                     console.log('Cleared local storage');
 
-                    // Sign out from Supabase (don't wait for it)
-                    supabase.auth.signOut()
-                      .then(({ error }) => {
-                        console.log('SignOut result:', { error });
-                      })
-                      .catch((err) => {
-                        console.error('Logout exception:', err);
-                      });
+                    try {
+                      // Wait for sign out to complete
+                      const { error } = await supabase.auth.signOut();
+                      if (error) {
+                        console.error('SignOut error:', error);
+                      } else {
+                        console.log('SignOut successful');
+                      }
+                    } catch (err) {
+                      console.error('Logout exception:', err);
+                    }
 
-                    // Immediate redirect
+                    // Redirect after sign out is complete
                     console.log('Redirecting to /auth');
                     window.location.href = '/auth';
                   }}
