@@ -41,6 +41,7 @@ const convertDbToMarket = (dbMarket: any): Market => ({
   description: dbMarket.description,
   organizerContact: dbMarket.organizer_contact,
   requirements: dbMarket.requirements || [],
+  documents: dbMarket.documents || {},
   checklist: dbMarket.checklist || [],
   completed: dbMarket.completed,
   completedDate: dbMarket.completed_date
@@ -67,6 +68,7 @@ const convertMarketToDb = (market: Market, userId: string) => ({
   description: market.description,
   organizer_contact: market.organizerContact,
   requirements: market.requirements || [],
+  documents: market.documents || {},
   checklist: market.checklist || [],
   completed: market.completed || false,
   completed_date: market.completedDate

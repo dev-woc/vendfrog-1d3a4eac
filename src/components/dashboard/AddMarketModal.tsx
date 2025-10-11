@@ -8,10 +8,12 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { TimeSelector } from "@/components/ui/TimeSelector";
 import { Progress } from "@/components/ui/progress";
-import { CalendarIcon, Save, ArrowLeft, X } from "lucide-react";
+import { CalendarIcon, Save, ArrowLeft, X, FileText, Upload, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { uploadMarketDocument } from "@/lib/storage";
+import { supabase } from "@/integrations/supabase/client";
 
 interface AddMarketModalProps {
   open: boolean;
@@ -26,6 +28,11 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [existingDocuments, setExistingDocuments] = useState<{
+    businessLicense?: string;
+    liabilityInsurance?: string;
+    foodHandlersPermit?: string;
+  }>({});
   const [formData, setFormData] = useState({
     name: "",
     date: undefined as Date | undefined,
@@ -90,6 +97,9 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         },
         checklistItems: editingMarket.checklist?.map((item: any) => ({ id: item.id, label: item.label })) || [],
       });
+
+      // Store existing document URLs separately
+      setExistingDocuments(editingMarket.documents || {});
     } else if (open && !editingMarket) {
       // Reset form for new market
       setFormData({
@@ -116,6 +126,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         },
         checklistItems: [],
       });
+      setExistingDocuments({});
       setHasUnsavedChanges(false);
     }
   }, [open, editingMarket]);
@@ -189,17 +200,56 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
 
     setIsSaving(true);
 
-    const marketData = {
-      ...formData,
-      fee: parseFloat(formData.fee) || 0,
-      estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
-      date: formData.date?.toISOString().split('T')[0] || "",
-      checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
-    };
-
-    console.log('Processed market data:', marketData);
-
     try {
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
+      }
+
+      // Upload new documents if any
+      const documentUrls = { ...existingDocuments };
+      const marketId = editingMarket?.id || crypto.randomUUID();
+
+      if (formData.documents.businessLicense) {
+        documentUrls.businessLicense = await uploadMarketDocument(
+          formData.documents.businessLicense,
+          user.id,
+          marketId,
+          'businessLicense'
+        );
+      }
+
+      if (formData.documents.liabilityInsurance) {
+        documentUrls.liabilityInsurance = await uploadMarketDocument(
+          formData.documents.liabilityInsurance,
+          user.id,
+          marketId,
+          'liabilityInsurance'
+        );
+      }
+
+      if (formData.documents.foodHandlersPermit) {
+        documentUrls.foodHandlersPermit = await uploadMarketDocument(
+          formData.documents.foodHandlersPermit,
+          user.id,
+          marketId,
+          'foodHandlersPermit'
+        );
+      }
+
+      const marketData = {
+        ...formData,
+        id: marketId,
+        fee: parseFloat(formData.fee) || 0,
+        estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
+        date: formData.date?.toISOString().split('T')[0] || "",
+        documents: documentUrls,
+        checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
+      };
+
+      console.log('Processed market data:', marketData);
+
       if (editingMarket) {
         // Update existing market
         console.log('Updating market:', editingMarket.id);
@@ -481,6 +531,22 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
           <div className="space-y-4">
             <div>
               <Label htmlFor="businessLicense">Valid Business License</Label>
+              {existingDocuments.businessLicense && !formData.documents.businessLicense && (
+                <div className="mb-2 p-2 bg-muted rounded-md flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Business License (uploaded)</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(existingDocuments.businessLicense, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <Input
                 id="businessLicense"
                 type="file"
@@ -495,14 +561,31 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 className="cursor-pointer"
               />
               {formData.documents.businessLicense && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formData.documents.businessLicense.name}
+                <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                  <Upload className="h-3 w-3" />
+                  New file: {formData.documents.businessLicense.name}
                 </p>
               )}
             </div>
 
             <div>
               <Label htmlFor="liabilityInsurance">Liability Insurance</Label>
+              {existingDocuments.liabilityInsurance && !formData.documents.liabilityInsurance && (
+                <div className="mb-2 p-2 bg-muted rounded-md flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Liability Insurance (uploaded)</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(existingDocuments.liabilityInsurance, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <Input
                 id="liabilityInsurance"
                 type="file"
@@ -517,14 +600,31 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 className="cursor-pointer"
               />
               {formData.documents.liabilityInsurance && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formData.documents.liabilityInsurance.name}
+                <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                  <Upload className="h-3 w-3" />
+                  New file: {formData.documents.liabilityInsurance.name}
                 </p>
               )}
             </div>
 
             <div>
               <Label htmlFor="foodHandlersPermit">Food Handlers Permit</Label>
+              {existingDocuments.foodHandlersPermit && !formData.documents.foodHandlersPermit && (
+                <div className="mb-2 p-2 bg-muted rounded-md flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm">Food Handlers Permit (uploaded)</span>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => window.open(existingDocuments.foodHandlersPermit, '_blank')}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
               <Input
                 id="foodHandlersPermit"
                 type="file"
@@ -539,8 +639,9 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
                 className="cursor-pointer"
               />
               {formData.documents.foodHandlersPermit && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {formData.documents.foodHandlersPermit.name}
+                <p className="text-sm text-green-600 mt-1 flex items-center gap-1">
+                  <Upload className="h-3 w-3" />
+                  New file: {formData.documents.foodHandlersPermit.name}
                 </p>
               )}
             </div>
