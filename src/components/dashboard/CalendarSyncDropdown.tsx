@@ -83,12 +83,8 @@ export const CalendarSyncDropdown = ({
         if (validationError) {
           toast({
             title: "Cannot Sync Market",
-            description: validationError,
+            description: validationError + (onEditMarket ? " Click Edit to update the market times." : ""),
             variant: "destructive",
-            action: onEditMarket ? {
-              label: "Edit Market",
-              onClick: () => onEditMarket(selectedMarket)
-            } : undefined
           });
           return;
         }
