@@ -156,15 +156,15 @@ export const CalendarSyncDropdown = ({
               <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                 Sync "{selectedMarket.name}"
               </div>
-              <DropdownMenuItem onClick={() => handleSync('apple')}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('apple'); }}>
                 <Smartphone className="mr-2 h-4 w-4" />
                 Add to Apple Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSync('google')}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('google'); }}>
                 <Globe className="mr-2 h-4 w-4" />
                 Add to Google Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSync('ics')}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('ics'); }}>
                 <Download className="mr-2 h-4 w-4" />
                 Download ICS File
               </DropdownMenuItem>
@@ -177,15 +177,15 @@ export const CalendarSyncDropdown = ({
               <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                 Bulk Sync ({upcomingMarkets.length} markets)
               </div>
-              <DropdownMenuItem onClick={() => handleSync('apple', true)}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('apple', true); }}>
                 <Smartphone className="mr-2 h-4 w-4" />
                 Sync All to Apple Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSync('google', true)}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('google', true); }}>
                 <Globe className="mr-2 h-4 w-4" />
                 Sync All to Google Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleSync('ics', true)}>
+              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('ics', true); }}>
                 <Download className="mr-2 h-4 w-4" />
                 Download All as ICS
               </DropdownMenuItem>

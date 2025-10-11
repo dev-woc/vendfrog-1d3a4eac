@@ -153,11 +153,13 @@ export const MarketCalendar = () => {
                         {market.address.city}, {market.address.state}
                       </div>
                     </div>
-                    <CalendarSyncDropdown
-                      markets={[market]}
-                      selectedMarket={market}
-                      onEditMarket={handleEditMarket}
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <CalendarSyncDropdown
+                        markets={[market]}
+                        selectedMarket={market}
+                        onEditMarket={handleEditMarket}
+                      />
+                    </div>
                   </div>
                 </div>
               ))}

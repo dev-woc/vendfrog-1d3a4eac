@@ -82,17 +82,27 @@ export function generateICSFile(event: CalendarEvent): string {
 }
 
 export function downloadICSFile(event: CalendarEvent) {
-  const icsContent = generateICSFile(event);
-  const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  try {
+    const icsContent = generateICSFile(event);
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    // Clean up after a delay to ensure download starts
+    setTimeout(() => {
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }, 100);
+  } catch (error) {
+    console.error('Error downloading ICS file:', error);
+    throw error;
+  }
 }
 
 export function syncToAppleCalendar(event: CalendarEvent) {
