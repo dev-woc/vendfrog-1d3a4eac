@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -44,7 +43,11 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
     estimatedProfit: "",
     status: "pending" as "pending" | "confirmed" | "upcoming",
     organizerContact: "",
-    requirements: "",
+    documents: {
+      businessLicense: null as File | null,
+      liabilityInsurance: null as File | null,
+      foodHandlersPermit: null as File | null,
+    },
     checklistItems: [] as { id: string; label: string }[],
   });
 
@@ -80,7 +83,11 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         estimatedProfit: editingMarket.estimatedProfit?.toString() || "",
         status: editingMarket.status || "pending",
         organizerContact: editingMarket.organizerContact || "",
-        requirements: editingMarket.requirements?.join('\n') || "",
+        documents: {
+          businessLicense: null,
+          liabilityInsurance: null,
+          foodHandlersPermit: null,
+        },
         checklistItems: editingMarket.checklist?.map((item: any) => ({ id: item.id, label: item.label })) || [],
       });
     } else if (open && !editingMarket) {
@@ -102,7 +109,11 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         estimatedProfit: "",
         status: "pending",
         organizerContact: "",
-        requirements: "",
+        documents: {
+          businessLicense: null,
+          liabilityInsurance: null,
+          foodHandlersPermit: null,
+        },
         checklistItems: [],
       });
       setHasUnsavedChanges(false);
@@ -120,7 +131,6 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         fee: parseFloat(formData.fee) || 0,
         estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
         date: formData.date?.toISOString().split('T')[0] || "",
-        requirements: formData.requirements ? formData.requirements.split('\n').filter(req => req.trim()) : [],
         checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
       };
 
@@ -184,7 +194,6 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       fee: parseFloat(formData.fee) || 0,
       estimatedProfit: parseFloat(formData.estimatedProfit) || 0,
       date: formData.date?.toISOString().split('T')[0] || "",
-      requirements: formData.requirements ? formData.requirements.split('\n').filter(req => req.trim()) : [],
       checklist: formData.checklistItems.map(item => ({ ...item, completed: false })),
     };
 
@@ -469,15 +478,72 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
             />
           </div>
 
-          <div>
-            <Label htmlFor="requirements">Requirements (one per line)</Label>
-            <Textarea
-              id="requirements"
-              value={formData.requirements}
-              onChange={(e) => handleFormChange({ ...formData, requirements: e.target.value })}
-              placeholder="Valid business license&#10;Liability insurance&#10;Food handler's permit"
-              rows={3}
-            />
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="businessLicense">Valid Business License</Label>
+              <Input
+                id="businessLicense"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  handleFormChange({
+                    ...formData,
+                    documents: { ...formData.documents, businessLicense: file }
+                  });
+                }}
+                className="cursor-pointer"
+              />
+              {formData.documents.businessLicense && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.documents.businessLicense.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="liabilityInsurance">Liability Insurance</Label>
+              <Input
+                id="liabilityInsurance"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  handleFormChange({
+                    ...formData,
+                    documents: { ...formData.documents, liabilityInsurance: file }
+                  });
+                }}
+                className="cursor-pointer"
+              />
+              {formData.documents.liabilityInsurance && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.documents.liabilityInsurance.name}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <Label htmlFor="foodHandlersPermit">Food Handlers Permit</Label>
+              <Input
+                id="foodHandlersPermit"
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  handleFormChange({
+                    ...formData,
+                    documents: { ...formData.documents, foodHandlersPermit: file }
+                  });
+                }}
+                className="cursor-pointer"
+              />
+              {formData.documents.foodHandlersPermit && (
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.documents.foodHandlersPermit.name}
+                </p>
+              )}
+            </div>
           </div>
 
           {/* Checklist Items */}

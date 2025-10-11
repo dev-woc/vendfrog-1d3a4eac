@@ -24,6 +24,11 @@ export interface Market {
   description?: string;
   organizerContact?: string;
   requirements?: string[];
+  documents?: {
+    businessLicense?: string;
+    liabilityInsurance?: string;
+    foodHandlersPermit?: string;
+  };
   completed?: boolean;
   completedDate?: string;
 }
