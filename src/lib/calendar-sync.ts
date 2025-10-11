@@ -96,30 +96,9 @@ export function downloadICSFile(event: CalendarEvent) {
 }
 
 export function syncToAppleCalendar(event: CalendarEvent) {
-  const startDate = format(new Date(event.startDate), 'yyyyMMdd\'T\'HHmmss');
-  const endDate = format(new Date(event.endDate), 'yyyyMMdd\'T\'HHmmss');
-  
-  const params = new URLSearchParams({
-    title: event.title,
-    startdate: startDate,
-    enddate: endDate,
-    location: event.location,
-    notes: event.description
-  });
-
-  // Try Apple Calendar URL scheme first
-  const appleUrl = `calshow://calendar.apple.com/action?${params.toString()}`;
-  window.open(appleUrl, '_blank');
-  
-  // Fallback to webcal if available
-  setTimeout(() => {
-    const icsContent = generateICSFile(event);
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    const webcalUrl = url.replace('blob:', 'webcal:');
-    window.open(webcalUrl, '_blank');
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }, 1000);
+  // For Apple Calendar, the best approach is to download an ICS file
+  // that the user can open with their calendar app
+  downloadICSFile(event);
 }
 
 export function syncToGoogleCalendar(event: CalendarEvent) {
