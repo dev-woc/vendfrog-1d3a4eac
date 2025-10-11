@@ -83,24 +83,38 @@ export function generateICSFile(event: CalendarEvent): string {
 
 export function downloadICSFile(event: CalendarEvent) {
   try {
+    console.log('[ICS Download] Starting download for:', event.title);
+
     const icsContent = generateICSFile(event);
+    console.log('[ICS Download] Generated ICS content, length:', icsContent.length);
+
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    console.log('[ICS Download] Created blob, size:', blob.size);
+
     const url = URL.createObjectURL(blob);
+    console.log('[ICS Download] Created object URL:', url);
 
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    const filename = `${event.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    link.download = filename;
     link.style.display = 'none';
+
+    console.log('[ICS Download] Appending link to body and clicking...');
     document.body.appendChild(link);
     link.click();
 
+    console.log('[ICS Download] Click triggered, download should start');
+
     // Clean up after a delay to ensure download starts
     setTimeout(() => {
+      console.log('[ICS Download] Cleaning up...');
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
+      console.log('[ICS Download] Download complete!');
     }, 100);
   } catch (error) {
-    console.error('Error downloading ICS file:', error);
+    console.error('[ICS Download] Error downloading ICS file:', error);
     throw error;
   }
 }

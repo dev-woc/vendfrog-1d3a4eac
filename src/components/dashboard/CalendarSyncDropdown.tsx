@@ -57,7 +57,7 @@ export const CalendarSyncDropdown = ({
 
   const handleSync = (platform: 'apple' | 'google' | 'ics', bulkSync = false) => {
     try {
-      console.log('Starting sync for platform:', platform, 'bulkSync:', bulkSync);
+      console.log('[CalendarSync] Starting sync for platform:', platform, 'bulkSync:', bulkSync);
 
       if (bulkSync && markets.length > 0) {
         // Validate all markets before bulk sync
@@ -156,15 +156,33 @@ export const CalendarSyncDropdown = ({
               <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                 Sync "{selectedMarket.name}"
               </div>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('apple'); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('apple');
+                }}
+              >
                 <Smartphone className="mr-2 h-4 w-4" />
                 Add to Apple Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('google'); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('google');
+                }}
+              >
                 <Globe className="mr-2 h-4 w-4" />
                 Add to Google Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('ics'); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('ics');
+                }}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download ICS File
               </DropdownMenuItem>
@@ -177,15 +195,33 @@ export const CalendarSyncDropdown = ({
               <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                 Bulk Sync ({upcomingMarkets.length} markets)
               </div>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('apple', true); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('apple', true);
+                }}
+              >
                 <Smartphone className="mr-2 h-4 w-4" />
                 Sync All to Apple Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('google', true); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('google', true);
+                }}
+              >
                 <Globe className="mr-2 h-4 w-4" />
                 Sync All to Google Calendar
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.preventDefault(); handleSync('ics', true); }}>
+              <DropdownMenuItem
+                onSelect={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleSync('ics', true);
+                }}
+              >
                 <Download className="mr-2 h-4 w-4" />
                 Download All as ICS
               </DropdownMenuItem>
