@@ -19,7 +19,8 @@ import {
   Edit,
   Eye,
   Archive,
-  Clock
+  Clock,
+  CheckCircle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -64,10 +65,10 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
       <CardHeader className="pb-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <CardTitle className="text-lg">{market.name}</CardTitle>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             <Badge variant={
               displayStatus === "confirmed" ? "default" :
-              displayStatus === "pending" ? "secondary" : 
+              displayStatus === "pending" ? "secondary" :
               displayStatus === "upcoming" ? "default" : "outline"
             }>
               {displayStatus}
@@ -75,6 +76,12 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
             {daysUntilMarket > 0 && daysUntilMarket <= 14 && (
               <Badge variant="outline" className="text-xs">
                 {daysUntilMarket} day{daysUntilMarket !== 1 ? 's' : ''}
+              </Badge>
+            )}
+            {market.calendarSyncedAt && (
+              <Badge variant="secondary" className="text-xs flex items-center gap-1">
+                <CheckCircle className="h-3 w-3" />
+                Synced
               </Badge>
             )}
           </div>

@@ -24,13 +24,15 @@ interface CalendarSyncDropdownProps {
   selectedMarket?: Market | null;
   onSyncComplete?: () => void;
   onEditMarket?: (market: Market) => void;
+  onMarketSynced?: (marketId: string) => void;
 }
 
 export const CalendarSyncDropdown = ({
   markets,
   selectedMarket,
   onSyncComplete,
-  onEditMarket
+  onEditMarket,
+  onMarketSynced
 }: CalendarSyncDropdownProps) => {
   const { toast } = useToast();
   const [lastSyncTime, setLastSyncTime] = useState<string | null>(
@@ -73,6 +75,12 @@ export const CalendarSyncDropdown = ({
 
         console.log('Bulk syncing markets:', markets.length);
         bulkSyncMarkets(markets, platform);
+
+        // Mark all markets as synced
+        markets.forEach(market => {
+          onMarketSynced?.(market.id);
+        });
+
         toast({
           title: "Bulk Sync Started",
           description: `Syncing ${markets.length} markets to ${platform === 'apple' ? 'Apple Calendar' : platform === 'google' ? 'Google Calendar' : 'ICS files'}.`,
@@ -104,6 +112,9 @@ export const CalendarSyncDropdown = ({
             downloadICSFile(event);
             break;
         }
+
+        // Mark this market as synced
+        onMarketSynced?.(selectedMarket.id);
 
         toast({
           title: "Calendar Sync",

@@ -31,4 +31,5 @@ export interface Market {
   };
   completed?: boolean;
   completedDate?: string;
+  calendarSyncedAt?: string;
 }

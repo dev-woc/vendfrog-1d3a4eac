@@ -68,6 +68,17 @@ export const MarketCalendar = () => {
     setEditingMarket(null);
   };
 
+  const handleMarketSynced = async (marketId: string) => {
+    const market = upcomingMarkets.find(m => m.id === marketId);
+    if (market) {
+      const updatedMarket = {
+        ...market,
+        calendarSyncedAt: new Date().toISOString()
+      };
+      await updateMarket(updatedMarket);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -85,6 +96,7 @@ export const MarketCalendar = () => {
             markets={upcomingMarkets}
             selectedMarket={selectedMarket}
             onEditMarket={handleEditMarket}
+            onMarketSynced={handleMarketSynced}
           />
         </div>
       </CardHeader>
@@ -158,6 +170,7 @@ export const MarketCalendar = () => {
                         markets={[market]}
                         selectedMarket={market}
                         onEditMarket={handleEditMarket}
+                        onMarketSynced={handleMarketSynced}
                       />
                     </div>
                   </div>

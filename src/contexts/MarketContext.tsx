@@ -44,7 +44,8 @@ const convertDbToMarket = (dbMarket: any): Market => ({
   documents: dbMarket.documents || {},
   checklist: dbMarket.checklist || [],
   completed: dbMarket.completed,
-  completedDate: dbMarket.completed_date
+  completedDate: dbMarket.completed_date,
+  calendarSyncedAt: dbMarket.calendar_synced_at
 });
 
 // Helper function to convert Market object to database format
@@ -71,7 +72,8 @@ const convertMarketToDb = (market: Market, userId: string) => ({
   documents: market.documents || {},
   checklist: market.checklist || [],
   completed: market.completed || false,
-  completed_date: market.completedDate
+  completed_date: market.completedDate,
+  calendar_synced_at: market.calendarSyncedAt
 });
 
 // Helper function to get auth token and make Supabase REST API calls
