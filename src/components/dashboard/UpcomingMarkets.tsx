@@ -109,7 +109,7 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
             <CheckSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
-            <span>Checklist: {completedTasks}/{totalTasks} ({Math.round((completedTasks / totalTasks) * 100)}%)</span>
+            <span>Checklist: {completedTasks}/{totalTasks} ({totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%)</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-2">
             <Button variant="outline" size="sm" onClick={() => onViewChecklist?.(market)} className="min-h-[36px] text-xs">
@@ -142,7 +142,7 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
           >
             {completedTasks > 0 && (
               <span className="text-xs text-primary-foreground font-medium">
-                {Math.round((completedTasks / totalTasks) * 100)}%
+                {totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%
               </span>
             )}
           </div>
