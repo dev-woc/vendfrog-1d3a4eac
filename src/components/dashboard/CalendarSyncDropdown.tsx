@@ -132,13 +132,6 @@ export const CalendarSyncDropdown = ({
 
   return (
     <div className="flex items-center gap-2">
-      {lastSyncTime && (
-        <Badge variant="secondary" className="text-xs flex items-center gap-1">
-          <CheckCircle className="h-3 w-3" />
-          Calendar Synced
-        </Badge>
-      )}
-      
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="sm" className="flex items-center gap-2">
