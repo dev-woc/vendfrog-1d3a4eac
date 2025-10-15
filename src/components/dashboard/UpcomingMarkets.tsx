@@ -88,46 +88,51 @@ function MarketCard({ market, onViewDetails, onEditMarket, onCloseMarket, onView
           })}
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
-          <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-            <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <MapPin className="h-4 w-4 mr-2 shrink-0" />
             <span className="truncate">{market.address.city}, {market.address.state}</span>
           </div>
-          <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-            <DollarSign className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
-            <span>Fee: ${market.fee} | Est. Profit: ${market.estimatedProfit}</span>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <Clock className="h-4 w-4 mr-2 shrink-0" />
+            <span className="truncate">{market.marketStartTime} - {market.marketEndTime}</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="flex items-center text-sm text-muted-foreground">
+            <DollarSign className="h-4 w-4 mr-2 shrink-0" />
+            <span>Fee: ${market.fee}</span>
+          </div>
+          <div className="flex items-center text-sm text-muted-foreground">
+            <DollarSign className="h-4 w-4 mr-2 shrink-0" />
+            <span>Est. Profit: ${market.estimatedProfit}</span>
           </div>
         </div>
         
-        <div className="flex items-center text-xs sm:text-sm text-muted-foreground border-t pt-2 sm:pt-3">
-          <Clock className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
-          <span className="font-medium">Market Hours:</span>
-          <span className="ml-2 truncate">{market.marketStartTime} - {market.marketEndTime}</span>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-center text-xs sm:text-sm text-muted-foreground">
-            <CheckSquare className="h-3 w-3 sm:h-4 sm:w-4 mr-2 shrink-0" />
+        <div className="border-t pt-3">
+          <div className="flex items-center text-sm text-muted-foreground mb-2">
+            <CheckSquare className="h-4 w-4 mr-2 shrink-0" />
             <span>Checklist: {completedTasks}/{totalTasks} ({totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%)</span>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Button variant="outline" size="sm" onClick={() => onViewChecklist?.(market)} className="min-h-[36px] text-xs">
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" onClick={() => onViewChecklist?.(market)} className="flex-1 sm:flex-none">
               <CheckSquare className="h-3 w-3 mr-1" />
-              View Checklist
+              Checklist
             </Button>
-            <Button variant="outline" size="sm" onClick={() => onEditMarket?.(market)} className="min-h-[36px] text-xs">
+            <Button variant="outline" size="sm" onClick={() => onEditMarket?.(market)} className="flex-1 sm:flex-none">
               <Edit className="h-3 w-3 mr-1" />
               Edit
             </Button>
             {canClose && onCloseMarket && (
-              <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)} className="min-h-[36px] text-xs">
+              <Button variant="outline" size="sm" onClick={() => onCloseMarket(market)} className="flex-1 sm:flex-none">
                 <Archive className="h-3 w-3 mr-1" />
                 Close
               </Button>
             )}
             {!canClose && marketDate > today && (
-              <Button variant="outline" size="sm" onClick={() => onViewDetails?.(market)} className="min-h-[36px] text-xs">
+              <Button variant="outline" size="sm" onClick={() => onViewDetails?.(market)} className="flex-1 sm:flex-none">
                 <Eye className="h-3 w-3 mr-1" />
                 Details
               </Button>
