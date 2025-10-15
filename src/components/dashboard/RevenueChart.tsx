@@ -1,4 +1,4 @@
-import { TrendingUp, DollarSign } from "lucide-react";
+import { TrendingUp, DollarSign, Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar } from "recharts";
@@ -7,25 +7,29 @@ import { useMemo, useState } from "react";
 
 export function RevenueChart() {
   const { markets } = useMarkets();
-  const [selectedMetric, setSelectedMetric] = useState<"revenue" | "fees">("revenue");
+  const [selectedMetric, setSelectedMetric] = useState<"revenue" | "estimatedRevenue" | "fees">("revenue");
 
-  // Calculate monthly data from actual market data
+  // Calculate monthly data from all markets
   const monthlyData = useMemo(() => {
-    const monthlyStats: { [key: string]: { revenue: number; fees: number; markets: number } } = {};
+    const monthlyStats: { [key: string]: { revenue: number; estimatedRevenue: number; fees: number; markets: number } } = {};
 
     // Group markets by month and calculate totals
     markets.forEach(market => {
+      const date = new Date(market.date);
+      const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+
+      if (!monthlyStats[monthKey]) {
+        monthlyStats[monthKey] = { revenue: 0, estimatedRevenue: 0, fees: 0, markets: 0 };
+      }
+
+      // Add actual revenue from past markets
       if (market.actualRevenue) {
-        const date = new Date(market.date);
-        const monthKey = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-
-        if (!monthlyStats[monthKey]) {
-          monthlyStats[monthKey] = { revenue: 0, fees: 0, markets: 0 };
-        }
-
         monthlyStats[monthKey].revenue += market.actualRevenue;
         monthlyStats[monthKey].fees += market.fee || 0;
         monthlyStats[monthKey].markets += 1;
+      } else {
+        // Add estimated revenue from upcoming markets
+        monthlyStats[monthKey].estimatedRevenue += market.estimatedProfit || 0;
       }
     });
 
@@ -34,6 +38,7 @@ export function RevenueChart() {
       .map(([month, stats]) => ({
         month,
         revenue: stats.revenue,
+        estimatedRevenue: stats.estimatedRevenue,
         fees: stats.fees,
         markets: stats.markets
       }))
@@ -45,7 +50,7 @@ export function RevenueChart() {
 
     // If no data, return empty array
     return sortedData.length > 0 ? sortedData : [
-      { month: "No Data", revenue: 0, fees: 0, markets: 0 }
+      { month: "No Data", revenue: 0, estimatedRevenue: 0, fees: 0, markets: 0 }
     ];
   }, [markets]);
   return (
@@ -57,6 +62,11 @@ export function RevenueChart() {
               <>
                 <TrendingUp className="h-5 w-5 mr-2" />
                 Revenue Trend
+              </>
+            ) : selectedMetric === "estimatedRevenue" ? (
+              <>
+                <Calendar className="h-5 w-5 mr-2" />
+                Estimated Revenue Trend
               </>
             ) : (
               <>
@@ -72,6 +82,13 @@ export function RevenueChart() {
               onClick={() => setSelectedMetric("revenue")}
             >
               Revenue
+            </Button>
+            <Button
+              variant={selectedMetric === "estimatedRevenue" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedMetric("estimatedRevenue")}
+            >
+              Estimated
             </Button>
             <Button
               variant={selectedMetric === "fees" ? "default" : "outline"}
@@ -106,9 +123,17 @@ export function RevenueChart() {
             <Line
               type="monotone"
               dataKey={selectedMetric}
-              stroke={selectedMetric === "revenue" ? "#10b981" : "#f97316"}
+              stroke={
+                selectedMetric === "revenue" ? "#10b981" :
+                selectedMetric === "estimatedRevenue" ? "#3b82f6" :
+                "#f97316"
+              }
               strokeWidth={3}
-              dot={{ fill: selectedMetric === "revenue" ? "#10b981" : "#f97316" }}
+              dot={{
+                fill: selectedMetric === "revenue" ? "#10b981" :
+                      selectedMetric === "estimatedRevenue" ? "#3b82f6" :
+                      "#f97316"
+              }}
             />
           </LineChart>
         </ResponsiveContainer>
