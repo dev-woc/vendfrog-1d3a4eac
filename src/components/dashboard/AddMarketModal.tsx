@@ -21,9 +21,10 @@ interface AddMarketModalProps {
   onAddMarket?: (market: any) => void;
   onUpdateMarket?: (market: any) => void;
   editingMarket?: any;
+  selectedDate?: Date;
 }
 
-export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket, editingMarket }: AddMarketModalProps) {
+export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket, editingMarket, selectedDate }: AddMarketModalProps) {
   const { toast } = useToast();
   const [isSaving, setIsSaving] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -104,7 +105,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       // Reset form for new market
       setFormData({
         name: "",
-        date: undefined,
+        date: selectedDate || undefined,
         loadInTime: "",
         marketStartTime: "",
         marketEndTime: "",
@@ -129,7 +130,7 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
       setExistingDocuments({});
       setHasUnsavedChanges(false);
     }
-  }, [open, editingMarket]);
+  }, [open, editingMarket, selectedDate]);
 
   const handleAutoSave = async () => {
     if (!editingMarket || !hasUnsavedChanges) return;

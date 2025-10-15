@@ -205,6 +205,7 @@ export const MarketCalendar = () => {
           onOpenChange={setIsAddModalOpen}
           onAddMarket={handleAddMarket}
           onUpdateMarket={updateMarket}
+          selectedDate={selectedDate}
         />
 
         <AddMarketModal
