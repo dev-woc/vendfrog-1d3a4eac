@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminMarkets from "./pages/admin/AdminMarkets";
 import AdminDocuments from "./pages/admin/AdminDocuments";
+import FindMarkets from "./pages/FindMarkets";
 
 const queryClient = new QueryClient();
 
