@@ -239,8 +239,9 @@ export function AddMarketModal({ open, onOpenChange, onAddMarket, onUpdateMarket
         );
       }
 
+      const { checklistItems, ...restOfFormData } = formData;
       const marketData = {
-        ...formData,
+        ...restOfFormData,
         id: marketId,
         fee: parseFloat(formData.fee) || 0,
         estimatedProfit: parseFloat(formData.estimatedProfit) || 0,

@@ -97,6 +97,13 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
             </Link>
             <span className="text-muted-foreground text-xs">|</span>
             <Link
+              to="/find-markets"
+              className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Find Markets
+            </Link>
+            <span className="text-muted-foreground text-xs">|</span>
+            <Link
               to="/documents"
               className="text-xs sm:text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
@@ -166,6 +173,12 @@ export function DashboardHeader({ vendorName }: DashboardHeaderProps) {
                 <Link to="/markets" className="flex items-center">
                   <Calendar className="mr-2 h-4 w-4" />
                   <span>Markets</span>
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link to="/find-markets" className="flex items-center">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  <span>Find Markets</span>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
