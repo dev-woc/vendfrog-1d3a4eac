@@ -19,6 +19,7 @@ import AdminUsers from "./pages/admin/AdminUsers";
 import AdminMarkets from "./pages/admin/AdminMarkets";
 import AdminDocuments from "./pages/admin/AdminDocuments";
 import FindMarkets from "./pages/FindMarkets";
+import MarketProfile from "./pages/MarketProfile";
 
 const queryClient = new QueryClient();
 
@@ -45,6 +46,7 @@ const App = () => (
                   <Route path="/admin/markets" element={<AdminMarkets />} />
                   <Route path="/admin/documents" element={<AdminDocuments />} />
                   <Route path="/find-markets" element={<FindMarkets />} />
+                  <Route path="/market/:id" element={<MarketProfile />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
